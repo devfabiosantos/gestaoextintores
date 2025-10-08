@@ -1,0 +1,8 @@
+# Ignora arquivos de configuracao do NetBeans
+nbproject/
+
+# Ignora a pasta de build (arquivos compilados)
+build/
+
+# Ignora o manifesto dist do NetBeans
+dist/
