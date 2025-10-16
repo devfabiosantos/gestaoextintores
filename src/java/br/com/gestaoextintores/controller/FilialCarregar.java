@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.gestaoextintores.controller;
 
 import br.com.gestaoextintores.dao.FilialDAOImpl;
@@ -17,10 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- *
+ * Servlet para carregar os dados de uma filial para edição
  * @author Dev Fabio Santos
  */
-
 @WebServlet(name = "FilialCarregar", urlPatterns = {"/FilialCarregar"})
 public class FilialCarregar extends HttpServlet {
     
@@ -30,9 +24,9 @@ public class FilialCarregar extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        int idFilial = Integer.parseInt(request.getParameter("id"));
-        
         try {
+            int idFilial = Integer.parseInt(request.getParameter("id"));
+            
             FilialDAOImpl dao = new FilialDAOImpl();
             Filial filial = (Filial) dao.carregar(idFilial);
             
@@ -45,15 +39,9 @@ public class FilialCarregar extends HttpServlet {
             }
             
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao carregar filial para edição", ex);
-            request.setAttribute("mensagem", "Erro ao carregar dados da filial: " + ex.getMessage());
-            request.getRequestDispatcher("/filial/mensagem.jsp").forward(request, response);
+            LOGGER.log(Level.SEVERE, "Erro ao carregar filial", ex);
+            request.setAttribute("mensagem", "Erro ao carregar filial: " + ex.getMessage());
+            request.getRequestDispatcher("/FilialListar").forward(request, response);
         }
-    }
-    
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        doGet(request, response);
     }
 }

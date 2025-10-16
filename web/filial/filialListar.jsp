@@ -60,7 +60,10 @@
                         </div>
                     </c:otherwise>
                 </c:choose>
-
+                        
+                <div class="mt-3">
+                    <a href="${pageContext.request.contextPath}/" class="btn btn-outline-secondary">Voltar para Home</a>
+                </div>
             </div>
         </div>
     </div>
