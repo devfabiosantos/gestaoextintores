@@ -7,7 +7,7 @@ import java.util.Date;
  * @author Dev Fabio Santos
  */
 public class Extintor {
-    
+
     private int idExtintor;
     private String numeroControle;
     private String tipo; // CO2, PQS, Água, etc.
@@ -16,10 +16,9 @@ public class Extintor {
     private String localizacao; // Onde o extintor está instalado
     private int idFilial; // Referência à filial onde o extintor está localizado
 
-    public Extintor() {
-    }
+    public Extintor() {}
 
-    public Extintor(int idExtintor, String numeroControle, String tipo, Date dataRecarga, 
+    public Extintor(int idExtintor, String numeroControle, String tipo, Date dataRecarga,
                     Date dataValidade, String localizacao, int idFilial) {
         this.idExtintor = idExtintor;
         this.numeroControle = numeroControle;
