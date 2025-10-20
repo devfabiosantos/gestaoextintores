@@ -1,9 +1,3 @@
-<%-- 
-    Document   : filialCadastrar
-    Created on : 10/10/2025, 23:52:51
-    Author     : Dev Fabio Santos
---%>
-
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
@@ -22,13 +16,14 @@
             </div>
             <div class="card-body">
 
-                <!-- Mensagem de sucesso/erro -->
                 <c:if test="${not empty mensagem}">
                     <div class="alert alert-info text-center">${mensagem}</div>
                 </c:if>
 
-                <!-- Formulário -->
-                <form action="${pageContext.request.contextPath}/FilialCadastrar" method="post" class="needs-validation" novalidate>
+                <form action="${pageContext.request.contextPath}/FilialServlet" method="post" class="needs-validation" novalidate>
+                    
+                    <input type="hidden" name="acao" value="salvar" />
+                    
                     <div class="mb-3">
                         <label for="nome" class="form-label">Nome da Filial</label>
                         <input type="text" class="form-control" id="nome" name="nome" required>
@@ -42,7 +37,7 @@
                     </div>
 
                     <div class="d-flex justify-content-between mt-4">
-                        <a href="FilialListar" class="btn btn-outline-secondary">Voltar</a>
+                        <a href="${pageContext.request.contextPath}/FilialServlet?acao=listar" class="btn btn-outline-secondary">Voltar</a>
                         <button type="submit" class="btn btn-primary">Cadastrar</button>
                     </div>
                 </form>
@@ -51,7 +46,6 @@
     </div>
 
     <script>
-        // Validação front-end Bootstrap
         (function () {
             'use strict';
             var forms = document.querySelectorAll('.needs-validation');

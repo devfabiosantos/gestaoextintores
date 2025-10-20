@@ -73,6 +73,8 @@ public class ExtintorServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        request.setCharacterEncoding("UTF-8");
 
         String acao = request.getParameter("acao");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

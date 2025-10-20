@@ -1,9 +1,3 @@
-<%-- 
-    Document   : filialListar
-    Created on : 12/10/2025, 20:18:15
-    Author     : Dev Fabio Santos
---%>
-
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
@@ -18,7 +12,8 @@
         <div class="card shadow-sm border-0 rounded-3">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Filiais Cadastradas</h4>
-                <a href="${pageContext.request.contextPath}/filial/filialCadastrar.jsp" class="btn btn-light btn-sm">+ Nova Filial</a>
+                
+                <a href="${pageContext.request.contextPath}/FilialServlet?acao=novo" class="btn btn-light btn-sm">+ Nova Filial</a>
             </div>
             <div class="card-body">
 
@@ -33,30 +28,31 @@
                     </c:when>
                     <c:otherwise>
                         <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Nome</th>
-                                    <th>Endereço</th>
-                                    <th class="text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach var="filial" items="${listaFiliais}">
+                            <table class="table table-striped table-hover">
+                                <thead>
                                     <tr>
-                                        <td><c:out value="${filial.idFilial}"/></td>
-                                        <td><c:out value="${filial.nome}"/></td>
-                                        <td><c:out value="${filial.endereco}"/></td>
-                                        <td class="text-center">
-                                            <a href="${pageContext.request.contextPath}/FilialCarregar?id=${filial.idFilial}" class="btn btn-sm btn-warning">Editar</a>
-                                            <a href="${pageContext.request.contextPath}/FilialExcluir?id=${filial.idFilial}" class="btn btn-sm btn-danger"
-                                               onclick="return confirm('Deseja realmente excluir esta filial?');">Excluir</a>
-                                        </td>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Endereço</th>
+                                        <th class="text-center">Ações</th>
                                     </tr>
-                                </c:forEach>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="filial" items="${listaFiliais}">
+                                        <tr>
+                                            <td><c:out value="${filial.idFilial}"/></td>
+                                            <td><c:out value="${filial.nome}"/></td>
+                                            <td><c:out value="${filial.endereco}"/></td>
+                                            <td class="text-center">
+                                                <a href="${pageContext.request.contextPath}/FilialServlet?acao=editar&idFilial=${filial.idFilial}" class="btn btn-sm btn-warning">Editar</a>
+                                                
+                                                <a href="${pageContext.request.contextPath}/FilialServlet?acao=excluir&idFilial=${filial.idFilial}" class="btn btn-sm btn-danger"
+                                                   onclick="return confirm('Deseja realmente excluir esta filial?');">Excluir</a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
                         </div>
                     </c:otherwise>
                 </c:choose>
@@ -69,4 +65,3 @@
     </div>
 </body>
 </html>
-

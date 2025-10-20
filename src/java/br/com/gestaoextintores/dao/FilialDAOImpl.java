@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package br.com.gestaoextintores.dao;
 
 import br.com.gestaoextintores.model.Filial;
@@ -15,47 +10,32 @@ import java.util.logging.Logger;
 
 public class FilialDAOImpl implements GenericDAO {
 
-    private Connection conn;
+    private static final Logger LOGGER = Logger.getLogger(FilialDAOImpl.class.getName());
 
-    public FilialDAOImpl() throws Exception {
-        try {
-            this.conn = ConnectionFactory.getConnection();
-            System.out.println("Conectado com sucesso | {FILIAL}!");
-        } catch (Exception ex) {
-            throw new Exception("Erro ao conectar com o banco de dados: " + ex.getMessage(), ex);
-        }
-    }
+    // Construtor vazio, assim como o ExtintorDAOImpl
+    public FilialDAOImpl() {}
 
     @Override
     public boolean cadastrar(Object object) {
         Filial filial = (Filial) object;
         String sql = "INSERT INTO filial (nome, endereco) VALUES (?, ?)";
-        try {
+        
+        // Conexão aberta e fechada por método
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, filial.getNome());
-                stmt.setString(2, filial.getEndereco());
-                stmt.execute();
-            }
+            stmt.setString(1, filial.getNome());
+            stmt.setString(2, filial.getEndereco());
+            stmt.execute();
 
             conn.commit();
             return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Problema ao cadastrar filial!", ex);
-            try {
-                conn.rollback();
-            } catch (SQLException erroRollback) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao realizar rollback!", erroRollback);
-            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Problema ao cadastrar filial!", ex);
             return false;
-        } finally {
-            try {
-                ConnectionFactory.closeConnection(conn);
-            } catch (Exception ex) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao fechar conexão!", ex);
-            }
         }
     }
 
@@ -63,8 +43,12 @@ public class FilialDAOImpl implements GenericDAO {
     public List<Object> listar() {
         List<Object> resultado = new ArrayList<>();
         String sql = "SELECT * FROM filial ORDER BY nome";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
+        
+        // Conexão aberta e fechada por método
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
+            
             while (rs.next()) {
                 Filial filial = new Filial();
                 filial.setIdFilial(rs.getInt("id_filial"));
@@ -72,14 +56,8 @@ public class FilialDAOImpl implements GenericDAO {
                 filial.setEndereco(rs.getString("endereco"));
                 resultado.add(filial);
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao listar filiais!", ex);
-        } finally {
-            try {
-                ConnectionFactory.closeConnection(conn);
-            } catch (Exception ex) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao fechar conexão!", ex);
-            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao listar filiais!", ex);
         }
         return resultado;
     }
@@ -88,7 +66,11 @@ public class FilialDAOImpl implements GenericDAO {
     public List<Object> listar(int idObject) {
         List<Object> resultado = new ArrayList<>();
         String sql = "SELECT * FROM filial WHERE id_filial = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        // Conexão aberta e fechada por método
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
             stmt.setInt(1, idObject);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -99,14 +81,8 @@ public class FilialDAOImpl implements GenericDAO {
                     resultado.add(filial);
                 }
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao listar filial por ID!", ex);
-        } finally {
-            try {
-                ConnectionFactory.closeConnection(conn);
-            } catch (Exception ex) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao fechar conexão", ex);
-            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao listar filial por ID!", ex);
         }
         return resultado;
     }
@@ -114,31 +90,22 @@ public class FilialDAOImpl implements GenericDAO {
     @Override
     public Boolean excluir(int idObject) {
         String sql = "DELETE FROM filial WHERE id_filial = ?";
-        try {
+        
+        // Conexão aberta e fechada por método
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
             conn.setAutoCommit(false);
             //conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, idObject);
-                stmt.executeUpdate();
-            }
+            stmt.setInt(1, idObject);
+            stmt.executeUpdate();
 
             conn.commit();
             return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao excluir filial!", ex);
-            try {
-                conn.rollback();
-            } catch (SQLException erroRollback) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao realizar rollback!", erroRollback);
-            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao excluir filial!", ex);
             return false;
-        } finally {
-            try {
-                ConnectionFactory.closeConnection(conn);
-            } catch (Exception ex) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao fechar conexão!", ex);
-            }
         }
     }
 
@@ -146,7 +113,11 @@ public class FilialDAOImpl implements GenericDAO {
     public Object carregar(int idObject) {
         Filial filial = null;
         String sql = "SELECT * FROM filial WHERE id_filial = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        // Conexão aberta e fechada por método
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
             stmt.setInt(1, idObject);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -156,14 +127,8 @@ public class FilialDAOImpl implements GenericDAO {
                     filial.setEndereco(rs.getString("endereco"));
                 }
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao carregar filial!", ex);
-        } finally {
-            try {
-                ConnectionFactory.closeConnection(conn);
-            } catch (Exception ex) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao fechar conexão!", ex);
-            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao carregar filial!", ex);
         }
         return filial;
     }
@@ -172,33 +137,28 @@ public class FilialDAOImpl implements GenericDAO {
     public Boolean alterar(Object object) {
         Filial filial = (Filial) object;
         String sql = "UPDATE filial SET nome = ?, endereco = ? WHERE id_filial = ?";
-        try {
+        
+        // Conexão aberta e fechada por método
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, filial.getNome());
-                stmt.setString(2, filial.getEndereco());
-                stmt.setInt(5, filial.getIdFilial());
-                stmt.executeUpdate();
-            }
+            stmt.setString(1, filial.getNome());
+            stmt.setString(2, filial.getEndereco());
+            
+            // --- CORREÇÃO DO BUG DO ÍNDICE ---
+            stmt.setInt(3, filial.getIdFilial()); 
+            // ----------------------------------
+            
+            stmt.executeUpdate();
 
             conn.commit();
             return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao atualizar filial!", ex);
-            try {
-                conn.rollback();
-            } catch (SQLException erroRollback) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao realizar rollback!", erroRollback);
-            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao atualizar filial!", ex);
             return false;
-        } finally {
-            try {
-                ConnectionFactory.closeConnection(conn);
-            } catch (Exception ex) {
-                Logger.getLogger(FilialDAOImpl.class.getName()).log(Level.SEVERE, "Erro ao fechar conexão!", ex);
-            }
         }
     }
 }

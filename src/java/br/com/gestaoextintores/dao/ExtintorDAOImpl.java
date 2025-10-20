@@ -18,7 +18,7 @@ public class ExtintorDAOImpl implements GenericDAO {
     public boolean cadastrar(Object object) {
         Extintor extintor = (Extintor) object;
         String sql = "INSERT INTO extintor (numero_controle, tipo, data_recarga, data_validade, localizacao, id_filial) "
-                   + "VALUES (?, ?, ?, ?, ?, ?)";
+                     + "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -37,7 +37,7 @@ public class ExtintorDAOImpl implements GenericDAO {
             conn.commit();
             return true;
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) { // Alterado para Exception para pegar erros de conexão
             LOGGER.log(Level.SEVERE, "Erro ao cadastrar extintor!", ex);
             return false;
         }
@@ -64,7 +64,7 @@ public class ExtintorDAOImpl implements GenericDAO {
                 resultado.add(extintor);
             }
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) { // Alterado para Exception
             LOGGER.log(Level.SEVERE, "Erro ao listar extintores!", ex);
         }
 
@@ -94,7 +94,7 @@ public class ExtintorDAOImpl implements GenericDAO {
                 }
             }
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) { // Alterado para Exception
             LOGGER.log(Level.SEVERE, "Erro ao listar extintores por filial!", ex);
         }
 
@@ -116,7 +116,7 @@ public class ExtintorDAOImpl implements GenericDAO {
             conn.commit();
             return true;
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) { // Alterado para Exception
             LOGGER.log(Level.SEVERE, "Erro ao excluir extintor!", ex);
             return false;
         }
@@ -144,7 +144,7 @@ public class ExtintorDAOImpl implements GenericDAO {
                 }
             }
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) { // Alterado para Exception
             LOGGER.log(Level.SEVERE, "Erro ao carregar extintor!", ex);
         }
 
@@ -155,7 +155,7 @@ public class ExtintorDAOImpl implements GenericDAO {
     public Boolean alterar(Object object) {
         Extintor extintor = (Extintor) object;
         String sql = "UPDATE extintor SET numero_controle = ?, tipo = ?, data_recarga = ?, "
-                   + "data_validade = ?, localizacao = ?, id_filial = ? WHERE id_extintor = ?";
+                     + "data_validade = ?, localizacao = ?, id_filial = ? WHERE id_extintor = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -175,7 +175,7 @@ public class ExtintorDAOImpl implements GenericDAO {
             conn.commit();
             return true;
 
-        } catch (SQLException ex) {
+        } catch (Exception ex) { // Alterado para Exception
             LOGGER.log(Level.SEVERE, "Erro ao atualizar extintor!", ex);
             return false;
         }

@@ -1,3 +1,7 @@
+<%-- Adiciona as tags necessárias para um arquivo JSP --%>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
@@ -9,8 +13,18 @@
     <body class="bg-light">
         <div class="container mt-5">
             <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-danger text-white">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Sistema de Gestão de Extintores</h2>
+                    
+                    <c:if test="${not empty sessionScope.usuarioLogado}">
+                        <div>
+                            <span class="me-3">
+                                Bem-vindo(a), ${sessionScope.usuarioLogado.nome}
+                            </span>
+                            
+                            <a href="${pageContext.request.contextPath}/LogoutServlet" class="btn btn-light btn-sm">Sair</a>
+                        </div>
+                    </c:if>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -22,8 +36,8 @@
                                 <div class="card-body">
                                     <p>Cadastre e gerencie as filiais da empresa.</p>
                                     <div class="d-grid gap-2">
-                                        <a href="FilialListar" class="btn btn-outline-primary">Listar Filiais</a>
-                                        <a href="FilialCadastrar" class="btn btn-primary">Nova Filial</a>
+                                        <a href="${pageContext.request.contextPath}/FilialServlet?acao=listar" class="btn btn-outline-primary">Listar Filiais</a>
+                                        <a href="${pageContext.request.contextPath}/FilialServlet?acao=novo" class="btn btn-primary">Nova Filial</a>
                                     </div>
                                 </div>
                             </div>
@@ -36,8 +50,8 @@
                                 <div class="card-body">
                                     <p>Cadastre e gerencie os extintores de incêndio.</p>
                                     <div class="d-grid gap-2">
-                                        <a href="ExtintorListar" class="btn btn-outline-danger">Listar Extintores</a>
-                                        <a href="ExtintorCadastrar" class="btn btn-danger">Novo Extintor</a>
+                                        <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=listar" class="btn btn-outline-danger">Listar Extintores</a>
+                                        <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=novo" class="btn btn-danger">Novo Extintor</a>
                                     </div>
                                 </div>
                             </div>
