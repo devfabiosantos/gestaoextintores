@@ -1,9 +1,3 @@
-<%-- 
-    Document   : extintorListar
-    Created on : 15/08/2023, 15:30:00
-    Author     : Dev Fabio Santos
---%>
-
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -20,21 +14,22 @@
         <div class="card shadow-sm border-0 rounded-3">
             <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Extintores Cadastrados</h4>
-                <a href="${pageContext.request.contextPath}/ExtintorCadastrar" class="btn btn-light btn-sm">
+                
+                <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=novo" class="btn btn-light btn-sm">
                     + Novo Extintor
                 </a>
             </div>
 
             <div class="card-body">
 
-                <!-- Mensagem de feedback -->
                 <c:if test="${not empty sessionScope.mensagem}">
                     <div class="alert alert-info text-center">${sessionScope.mensagem}</div>
                     <c:remove var="mensagem" scope="session"/>
                 </c:if>
 
-                <!-- Filtro por filial -->
-                <form action="${pageContext.request.contextPath}/ExtintorListar" method="get" class="mb-4">
+                <form action="${pageContext.request.contextPath}/ExtintorServlet" method="get" class="mb-4">
+                    <input type="hidden" name="acao" value="listar" /> 
+                    
                     <div class="row g-3 align-items-end">
                         <div class="col-md-6">
                             <label for="idFilial" class="form-label">Filtrar por Filial:</label>
@@ -54,7 +49,6 @@
                     </div>
                 </form>
 
-                <!-- Lista de extintores -->
                 <c:choose>
                     <c:when test="${empty listaExtintores}">
                         <div class="alert alert-info text-center">Nenhum extintor cadastrado.</div>
@@ -86,9 +80,10 @@
                                             <td><c:out value="${extintor.localizacao}"/></td>
                                             <td><c:out value="${extintor.idFilial}"/></td>
                                             <td>
-                                                <a href="${pageContext.request.contextPath}/ExtintorCarregar?id=${extintor.idExtintor}" 
+                                                <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=editar&idExtintor=${extintor.idExtintor}" 
                                                    class="btn btn-sm btn-warning me-1">Editar</a>
-                                                <a href="${pageContext.request.contextPath}/ExtintorExcluir?id=${extintor.idExtintor}" 
+                                                
+                                                <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=excluir&idExtintor=${extintor.idExtintor}" 
                                                    class="btn btn-sm btn-danger"
                                                    onclick="return confirm('Deseja realmente excluir este extintor?');">
                                                     Excluir

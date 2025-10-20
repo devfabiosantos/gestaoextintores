@@ -32,14 +32,18 @@ public class ExtintorServlet extends HttpServlet {
 
             if (acao == null || acao.equals("listar")) {
                 List<Object> listaExtintores = extintorDAO.listar();
-                request.setAttribute("extintores", listaExtintores);
-                RequestDispatcher rd = request.getRequestDispatcher("/extintorListar.jsp");
+                request.setAttribute("listaExtintores", listaExtintores);
+
+                // CORRIGIDO:
+                RequestDispatcher rd = request.getRequestDispatcher("/extintor/extintorListar.jsp");
                 rd.forward(request, response);
 
             } else if (acao.equals("novo")) {
                 List<Object> listaFiliais = filialDAO.listar();
-                request.setAttribute("filiais", listaFiliais);
-                RequestDispatcher rd = request.getRequestDispatcher("/extintorCadastrar.jsp");
+                request.setAttribute("listaFiliais", listaFiliais);
+
+                // CORRIGIDO:
+                RequestDispatcher rd = request.getRequestDispatcher("/extintor/extintorCadastrar.jsp");
                 rd.forward(request, response);
 
             } else if (acao.equals("editar")) {
@@ -48,15 +52,16 @@ public class ExtintorServlet extends HttpServlet {
                 List<Object> listaFiliais = filialDAO.listar();
 
                 request.setAttribute("extintor", extintor);
-                request.setAttribute("filiais", listaFiliais);
+                request.setAttribute("listaFiliais", listaFiliais);
 
-                RequestDispatcher rd = request.getRequestDispatcher("/extintorEditar.jsp");
+                // CORRIGIDO (assumindo que extintorEditar.jsp também está na pasta):
+                RequestDispatcher rd = request.getRequestDispatcher("/extintor/extintorEditar.jsp");
                 rd.forward(request, response);
 
             } else if (acao.equals("excluir")) {
                 int idExtintor = Integer.parseInt(request.getParameter("idExtintor"));
                 extintorDAO.excluir(idExtintor);
-                response.sendRedirect("ExtintorServlet?acao=listar");
+                response.sendRedirect(request.getContextPath() + "/ExtintorServlet?acao=listar"); // Este redirect está correto
             }
 
         } catch (Exception ex) {

@@ -20,7 +20,8 @@
                 <div class="alert alert-danger text-center">${mensagem}</div>
             </c:if>
 
-            <form action="${pageContext.request.contextPath}/ExtintorCadastrar" method="post" class="needs-validation" novalidate>
+            <form action="${pageContext.request.contextPath}/ExtintorServlet" method="post" class="needs-validation" novalidate>
+                <input type="hidden" name="acao" value="salvar" />
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="numeroControle" class="form-label">Número de Controle*</label>
@@ -73,7 +74,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">
-                    <a href="${pageContext.request.contextPath}/ExtintorListar" class="btn btn-outline-secondary me-2">Cancelar</a>
+                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=listar" class="btn btn-outline-secondary me-2">Cancelar</a>
                     <button type="submit" class="btn btn-primary">Cadastrar</button>
                 </div>
             </form>
