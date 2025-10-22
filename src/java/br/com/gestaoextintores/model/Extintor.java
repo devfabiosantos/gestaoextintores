@@ -1,32 +1,33 @@
 package br.com.gestaoextintores.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Classe que representa a entidade Extintor no sistema
  * @author Dev Fabio Santos
  */
-public class Extintor {
+public class Extintor implements Serializable {
+    
+    private static final long serialVersionUID = 1L;
 
     private int idExtintor;
+    private String tipoEquipamento;
     private String numeroControle;
-    private String tipo; // CO2, PQS, Água, etc.
-    private Date dataRecarga; // Data da última recarga
-    private Date dataValidade; // Data de validade da carga
-    private String localizacao; // Onde o extintor está instalado
-    private int idFilial; // Referência à filial onde o extintor está localizado
+    private String classeExtintora;
+    private String cargaNominal;
+    private String referenciaLocalizacao;
+    private Date dataRecarga;
+    private Date dataValidade;
+    private String observacao;
+    
+    private int idSetor;
+    private int idStatus;
+    
+    private Setor setor;
+    private StatusExtintor status;
 
-    public Extintor() {}
-
-    public Extintor(int idExtintor, String numeroControle, String tipo, Date dataRecarga,
-                    Date dataValidade, String localizacao, int idFilial) {
-        this.idExtintor = idExtintor;
-        this.numeroControle = numeroControle;
-        this.tipo = tipo;
-        this.dataRecarga = dataRecarga;
-        this.dataValidade = dataValidade;
-        this.localizacao = localizacao;
-        this.idFilial = idFilial;
+    public Extintor() {
     }
 
     public int getIdExtintor() {
@@ -37,6 +38,14 @@ public class Extintor {
         this.idExtintor = idExtintor;
     }
 
+    public String getTipoEquipamento() {
+        return tipoEquipamento;
+    }
+
+    public void setTipoEquipamento(String tipoEquipamento) {
+        this.tipoEquipamento = tipoEquipamento;
+    }
+
     public String getNumeroControle() {
         return numeroControle;
     }
@@ -45,12 +54,28 @@ public class Extintor {
         this.numeroControle = numeroControle;
     }
 
-    public String getTipo() {
-        return tipo;
+    public String getClasseExtintora() {
+        return classeExtintora;
     }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
+    public void setClasseExtintora(String classeExtintora) {
+        this.classeExtintora = classeExtintora;
+    }
+
+    public String getCargaNominal() {
+        return cargaNominal;
+    }
+
+    public void setCargaNominal(String cargaNominal) {
+        this.cargaNominal = cargaNominal;
+    }
+
+    public String getReferenciaLocalizacao() {
+        return referenciaLocalizacao;
+    }
+
+    public void setReferenciaLocalizacao(String referenciaLocalizacao) {
+        this.referenciaLocalizacao = referenciaLocalizacao;
     }
 
     public Date getDataRecarga() {
@@ -69,32 +94,43 @@ public class Extintor {
         this.dataValidade = dataValidade;
     }
 
-    public String getLocalizacao() {
-        return localizacao;
+    public String getObservacao() {
+        return observacao;
     }
 
-    public void setLocalizacao(String localizacao) {
-        this.localizacao = localizacao;
+    public void setObservacao(String observacao) {
+        this.observacao = observacao;
     }
 
-    public int getIdFilial() {
-        return idFilial;
+    public int getIdSetor() {
+        return idSetor;
     }
 
-    public void setIdFilial(int idFilial) {
-        this.idFilial = idFilial;
+    public void setIdSetor(int idSetor) {
+        this.idSetor = idSetor;
     }
 
-    @Override
-    public String toString() {
-        return "Extintor{" +
-                "idExtintor=" + idExtintor +
-                ", numeroControle='" + numeroControle + '\'' +
-                ", tipo='" + tipo + '\'' +
-                ", dataRecarga=" + dataRecarga +
-                ", dataValidade=" + dataValidade +
-                ", localizacao='" + localizacao + '\'' +
-                ", idFilial=" + idFilial +
-                '}';
+    public int getIdStatus() {
+        return idStatus;
+    }
+
+    public void setIdStatus(int idStatus) {
+        this.idStatus = idStatus;
+    }
+
+    public Setor getSetor() {
+        return setor;
+    }
+
+    public void setSetor(Setor setor) {
+        this.setor = setor;
+    }
+
+    public StatusExtintor getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusExtintor status) {
+        this.status = status;
     }
 }

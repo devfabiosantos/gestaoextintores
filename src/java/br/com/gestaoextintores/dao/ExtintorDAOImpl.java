@@ -1,6 +1,7 @@
 package br.com.gestaoextintores.dao;
 
 import br.com.gestaoextintores.model.Extintor;
+import br.com.gestaoextintores.model.Usuario;
 import br.com.gestaoextintores.util.ConnectionFactory;
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,176 +9,188 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ExtintorDAOImpl implements GenericDAO {
+public class ExtintorDAOImpl {
 
     private static final Logger LOGGER = Logger.getLogger(ExtintorDAOImpl.class.getName());
 
     public ExtintorDAOImpl() {}
 
-    @Override
-    public boolean cadastrar(Object object) {
-        Extintor extintor = (Extintor) object;
-        String sql = "INSERT INTO extintor (numero_controle, tipo, data_recarga, data_validade, localizacao, id_filial) "
-                     + "VALUES (?, ?, ?, ?, ?, ?)";
+    public boolean cadastrar(Extintor extintor) {
+        String sql = "INSERT INTO extintor (tipo_equipamento, numero_controle, " +
+                     "classe_extintora, carga_nominal, referencia_localizacao, " +
+                     "data_recarga, data_validade, observacao, id_setor, id_status) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-            stmt.setString(1, extintor.getNumeroControle());
-            stmt.setString(2, extintor.getTipo());
-            stmt.setDate(3, extintor.getDataRecarga() != null ? new java.sql.Date(extintor.getDataRecarga().getTime()) : null);
-            stmt.setDate(4, extintor.getDataValidade() != null ? new java.sql.Date(extintor.getDataValidade().getTime()) : null);
-            stmt.setString(5, extintor.getLocalizacao());
-            stmt.setInt(6, extintor.getIdFilial());
+            
+            stmt.setString(1, extintor.getTipoEquipamento());
+            stmt.setString(2, extintor.getNumeroControle());
+            stmt.setString(3, extintor.getClasseExtintora());
+            stmt.setString(4, extintor.getCargaNominal());
+            stmt.setString(5, extintor.getReferenciaLocalizacao());
+            stmt.setDate(6, extintor.getDataRecarga() != null ? new java.sql.Date(extintor.getDataRecarga().getTime()) : null);
+            stmt.setDate(7, extintor.getDataValidade() != null ? new java.sql.Date(extintor.getDataValidade().getTime()) : null);
+            stmt.setString(8, extintor.getObservacao());
+            stmt.setInt(9, extintor.getIdSetor());
+            stmt.setInt(10, extintor.getIdStatus());
 
             stmt.executeUpdate();
             conn.commit();
             return true;
 
-        } catch (Exception ex) { // Alterado para Exception para pegar erros de conexão
+        } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao cadastrar extintor!", ex);
             return false;
         }
     }
 
-    @Override
-    public List<Object> listar() {
-        List<Object> resultado = new ArrayList<>();
-        String sql = "SELECT * FROM extintor ORDER BY id_extintor";
+    public List<Extintor> listar(Usuario usuarioLogado) {
+        List<Extintor> resultado = new ArrayList<>();
 
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        String sql = "SELECT e.* FROM extintor e " +
+                     "JOIN setor s ON e.id_setor = s.id_setor";
 
-            while (rs.next()) {
-                Extintor extintor = new Extintor();
-                extintor.setIdExtintor(rs.getInt("id_extintor"));
-                extintor.setNumeroControle(rs.getString("numero_controle"));
-                extintor.setTipo(rs.getString("tipo"));
-                extintor.setDataRecarga(rs.getDate("data_recarga"));
-                extintor.setDataValidade(rs.getDate("data_validade"));
-                extintor.setLocalizacao(rs.getString("localizacao"));
-                extintor.setIdFilial(rs.getInt("id_filial"));
-                resultado.add(extintor);
-            }
-
-        } catch (Exception ex) { // Alterado para Exception
-            LOGGER.log(Level.SEVERE, "Erro ao listar extintores!", ex);
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " WHERE s.id_filial = ?";
         }
-
-        return resultado;
-    }
-
-    @Override
-    public List<Object> listar(int idFilial) {
-        List<Object> resultado = new ArrayList<>();
-        String sql = "SELECT * FROM extintor WHERE id_filial = ? ORDER BY id_extintor";
+        
+        sql += " ORDER BY e.id_extintor";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, idFilial);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Extintor extintor = new Extintor();
-                    extintor.setIdExtintor(rs.getInt("id_extintor"));
-                    extintor.setNumeroControle(rs.getString("numero_controle"));
-                    extintor.setTipo(rs.getString("tipo"));
-                    extintor.setDataRecarga(rs.getDate("data_recarga"));
-                    extintor.setDataValidade(rs.getDate("data_validade"));
-                    extintor.setLocalizacao(rs.getString("localizacao"));
-                    extintor.setIdFilial(rs.getInt("id_filial"));
-                    resultado.add(extintor);
-                }
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(1, usuarioLogado.getIdFilial());
             }
 
-        } catch (Exception ex) { // Alterado para Exception
-            LOGGER.log(Level.SEVERE, "Erro ao listar extintores por filial!", ex);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    resultado.add(popularExtintor(rs));
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao listar extintores!", ex);
         }
-
         return resultado;
     }
 
-    @Override
-    public Boolean excluir(int idExtintor) {
-        String sql = "DELETE FROM extintor WHERE id_extintor = ?";
+    public Extintor carregar(int idExtintor, Usuario usuarioLogado) {
+        Extintor extintor = null;
+        String sql = "SELECT e.* FROM extintor e " +
+                     "JOIN setor s ON e.id_setor = s.id_setor " + // JOIN para segurança
+                     "WHERE e.id_extintor = ?";
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " AND s.id_filial = ?";
+        }
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idExtintor);
+
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(2, usuarioLogado.getIdFilial());
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    extintor = popularExtintor(rs);
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao carregar extintor!", ex);
+        }
+        return extintor;
+    }
+
+    public Boolean alterar(Extintor extintor, Usuario usuarioLogado) {
+        String sql = "UPDATE extintor SET tipo_equipamento = ?, numero_controle = ?, " +
+                     "classe_extintora = ?, carga_nominal = ?, referencia_localizacao = ?, " +
+                     "data_recarga = ?, data_validade = ?, observacao = ?, " +
+                     "id_setor = ?, id_status = ? " +
+                     "WHERE id_extintor = ?";
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " AND id_setor IN (SELECT id_setor FROM setor WHERE id_filial = ?)";
+        }
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
-            stmt.setInt(1, idExtintor);
+            stmt.setString(1, extintor.getTipoEquipamento());
+            stmt.setString(2, extintor.getNumeroControle());
+            stmt.setString(3, extintor.getClasseExtintora());
+            stmt.setString(4, extintor.getCargaNominal());
+            stmt.setString(5, extintor.getReferenciaLocalizacao());
+            stmt.setDate(6, extintor.getDataRecarga() != null ? new java.sql.Date(extintor.getDataRecarga().getTime()) : null);
+            stmt.setDate(7, extintor.getDataValidade() != null ? new java.sql.Date(extintor.getDataValidade().getTime()) : null);
+            stmt.setString(8, extintor.getObservacao());
+            stmt.setInt(9, extintor.getIdSetor());
+            stmt.setInt(10, extintor.getIdStatus());
+
+            stmt.setInt(11, extintor.getIdExtintor());
+
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(12, usuarioLogado.getIdFilial());
+            }
+
             stmt.executeUpdate();
             conn.commit();
             return true;
 
-        } catch (Exception ex) { // Alterado para Exception
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao atualizar extintor!", ex);
+            return false;
+        }
+    }
+
+    public Boolean excluir(int idExtintor, Usuario usuarioLogado) {
+        String sql = "DELETE FROM extintor WHERE id_extintor = ?";
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " AND id_setor IN (SELECT id_setor FROM setor WHERE id_filial = ?)";
+        }
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            conn.setAutoCommit(false);
+
+            stmt.setInt(1, idExtintor);
+
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(2, usuarioLogado.getIdFilial());
+            }
+
+            stmt.executeUpdate();
+            conn.commit();
+            return true;
+
+        } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao excluir extintor!", ex);
             return false;
         }
     }
 
-    @Override
-    public Object carregar(int idExtintor) {
-        Extintor extintor = null;
-        String sql = "SELECT * FROM extintor WHERE id_extintor = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, idExtintor);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    extintor = new Extintor();
-                    extintor.setIdExtintor(rs.getInt("id_extintor"));
-                    extintor.setNumeroControle(rs.getString("numero_controle"));
-                    extintor.setTipo(rs.getString("tipo"));
-                    extintor.setDataRecarga(rs.getDate("data_recarga"));
-                    extintor.setDataValidade(rs.getDate("data_validade"));
-                    extintor.setLocalizacao(rs.getString("localizacao"));
-                    extintor.setIdFilial(rs.getInt("id_filial"));
-                }
-            }
-
-        } catch (Exception ex) { // Alterado para Exception
-            LOGGER.log(Level.SEVERE, "Erro ao carregar extintor!", ex);
-        }
-
+    private Extintor popularExtintor(ResultSet rs) throws SQLException {
+        Extintor extintor = new Extintor();
+        extintor.setIdExtintor(rs.getInt("id_extintor"));
+        extintor.setTipoEquipamento(rs.getString("tipo_equipamento"));
+        extintor.setNumeroControle(rs.getString("numero_controle"));
+        extintor.setClasseExtintora(rs.getString("classe_extintora"));
+        extintor.setCargaNominal(rs.getString("carga_nominal"));
+        extintor.setReferenciaLocalizacao(rs.getString("referencia_localizacao"));
+        extintor.setDataRecarga(rs.getDate("data_recarga"));
+        extintor.setDataValidade(rs.getDate("data_validade"));
+        extintor.setObservacao(rs.getString("observacao"));
+        extintor.setIdSetor(rs.getInt("id_setor"));
+        extintor.setIdStatus(rs.getInt("id_status"));
         return extintor;
-    }
-
-    @Override
-    public Boolean alterar(Object object) {
-        Extintor extintor = (Extintor) object;
-        String sql = "UPDATE extintor SET numero_controle = ?, tipo = ?, data_recarga = ?, "
-                     + "data_validade = ?, localizacao = ?, id_filial = ? WHERE id_extintor = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-            stmt.setString(1, extintor.getNumeroControle());
-            stmt.setString(2, extintor.getTipo());
-            stmt.setDate(3, extintor.getDataRecarga() != null ? new java.sql.Date(extintor.getDataRecarga().getTime()) : null);
-            stmt.setDate(4, extintor.getDataValidade() != null ? new java.sql.Date(extintor.getDataValidade().getTime()) : null);
-            stmt.setString(5, extintor.getLocalizacao());
-            stmt.setInt(6, extintor.getIdFilial());
-            stmt.setInt(7, extintor.getIdExtintor());
-
-            stmt.executeUpdate();
-            conn.commit();
-            return true;
-
-        } catch (Exception ex) { // Alterado para Exception
-            LOGGER.log(Level.SEVERE, "Erro ao atualizar extintor!", ex);
-            return false;
-        }
     }
 }

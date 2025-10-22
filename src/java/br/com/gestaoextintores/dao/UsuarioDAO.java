@@ -10,6 +10,7 @@ import br.com.gestaoextintores.util.ConnectionFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +27,9 @@ public class UsuarioDAO {
     
     public Usuario validarLogin(String login, String senha) {
         
-        String sql = "SELECT * FROM usuario WHERE login = ? AND senha = ?";
+        String sql = "SELECT id_usuario, nome, login, perfil, id_filial " +
+                     "FROM usuario WHERE login = ? AND senha = ?";
+        
         Usuario usuarioLogado = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -36,18 +39,26 @@ public class UsuarioDAO {
             stmt.setString(2, senha);
 
             try (ResultSet rs = stmt.executeQuery()) {
+                
                 if (rs.next()) {
                     usuarioLogado = new Usuario();
                     usuarioLogado.setIdUsuario(rs.getInt("id_usuario"));
                     usuarioLogado.setNome(rs.getString("nome"));
                     usuarioLogado.setLogin(rs.getString("login"));
+
                     usuarioLogado.setPerfil(rs.getString("perfil"));
+
+                    int idFilialDb = rs.getInt("id_filial");
+                    if (rs.wasNull()) {
+                        usuarioLogado.setIdFilial(null); 
+                    } else {
+                        usuarioLogado.setIdFilial(idFilialDb);
+                    }
                 }
             }
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Erro ao validar login!", ex);
         }
-        
         return usuarioLogado;
     }
 }

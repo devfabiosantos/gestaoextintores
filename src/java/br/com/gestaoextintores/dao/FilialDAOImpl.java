@@ -1,6 +1,7 @@
 package br.com.gestaoextintores.dao;
 
 import br.com.gestaoextintores.model.Filial;
+import br.com.gestaoextintores.model.Usuario; // Precisamos do Usuário
 import br.com.gestaoextintores.util.ConnectionFactory;
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,29 +9,22 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FilialDAOImpl implements GenericDAO {
+public class FilialDAOImpl {
 
     private static final Logger LOGGER = Logger.getLogger(FilialDAOImpl.class.getName());
 
-    // Construtor vazio, assim como o ExtintorDAOImpl
     public FilialDAOImpl() {}
 
-    @Override
-    public boolean cadastrar(Object object) {
-        Filial filial = (Filial) object;
+    public boolean cadastrar(Filial filial) {
         String sql = "INSERT INTO filial (nome, endereco) VALUES (?, ?)";
         
-        // Conexão aberta e fechada por método
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
             stmt.setString(1, filial.getNome());
             stmt.setString(2, filial.getEndereco());
             stmt.execute();
-
             conn.commit();
             return true;
         } catch (Exception ex) {
@@ -39,39 +33,24 @@ public class FilialDAOImpl implements GenericDAO {
         }
     }
 
-    @Override
-    public List<Object> listar() {
-        List<Object> resultado = new ArrayList<>();
-        String sql = "SELECT * FROM filial ORDER BY nome";
-        
-        // Conexão aberta e fechada por método
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            
-            while (rs.next()) {
-                Filial filial = new Filial();
-                filial.setIdFilial(rs.getInt("id_filial"));
-                filial.setNome(rs.getString("nome"));
-                filial.setEndereco(rs.getString("endereco"));
-                resultado.add(filial);
-            }
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao listar filiais!", ex);
-        }
-        return resultado;
-    }
+    public List<Filial> listar(Usuario usuarioLogado) {
+        List<Filial> resultado = new ArrayList<>();
 
-    @Override
-    public List<Object> listar(int idObject) {
-        List<Object> resultado = new ArrayList<>();
-        String sql = "SELECT * FROM filial WHERE id_filial = ?";
+        String sql = "SELECT * FROM filial";
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " WHERE id_filial = ?";
+        }
         
-        // Conexão aberta e fechada por método
+        sql += " ORDER BY nome";
+        
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(1, usuarioLogado.getIdFilial());
+            }
             
-            stmt.setInt(1, idObject);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Filial filial = new Filial();
@@ -82,25 +61,28 @@ public class FilialDAOImpl implements GenericDAO {
                 }
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao listar filial por ID!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao listar filiais!", ex);
         }
         return resultado;
     }
 
-    @Override
-    public Boolean excluir(int idObject) {
+    public Boolean excluir(int idFilial, Usuario usuarioLogado) {
         String sql = "DELETE FROM filial WHERE id_filial = ?";
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " AND id_filial = ?";
+        }
         
-        // Conexão aberta e fechada por método
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            conn.setAutoCommit(false);
-            //conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            stmt.setInt(1, idFilial);
 
-            stmt.setInt(1, idObject);
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(2, usuarioLogado.getIdFilial());
+            }
+
             stmt.executeUpdate();
-
             conn.commit();
             return true;
         } catch (Exception ex) {
@@ -109,16 +91,23 @@ public class FilialDAOImpl implements GenericDAO {
         }
     }
 
-    @Override
-    public Object carregar(int idObject) {
+    public Filial carregar(int idFilial, Usuario usuarioLogado) {
         Filial filial = null;
         String sql = "SELECT * FROM filial WHERE id_filial = ?";
-        
-        // Conexão aberta e fechada por método
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " AND id_filial = ?";
+        }
+
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, idObject);
+            stmt.setInt(1, idFilial);
+ 
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(2, usuarioLogado.getIdFilial());
+            }
+            
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     filial = new Filial();
@@ -133,27 +122,27 @@ public class FilialDAOImpl implements GenericDAO {
         return filial;
     }
 
-    @Override
-    public Boolean alterar(Object object) {
-        Filial filial = (Filial) object;
+    public Boolean alterar(Filial filial, Usuario usuarioLogado) {
         String sql = "UPDATE filial SET nome = ?, endereco = ? WHERE id_filial = ?";
         
-        // Conexão aberta e fechada por método
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " AND id_filial = ?";
+        }
+        
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
             stmt.setString(1, filial.getNome());
             stmt.setString(2, filial.getEndereco());
+            stmt.setInt(3, filial.getIdFilial());
             
-            // --- CORREÇÃO DO BUG DO ÍNDICE ---
-            stmt.setInt(3, filial.getIdFilial()); 
-            // ----------------------------------
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(4, usuarioLogado.getIdFilial());
+            }
             
             stmt.executeUpdate();
-
             conn.commit();
             return true;
         } catch (Exception ex) {

@@ -20,6 +20,7 @@ public class Usuario implements Serializable {
     private String login;
     private String senha;
     private String perfil;
+    private Integer idFilial; 
 
     public Usuario() {
     }
@@ -62,5 +63,13 @@ public class Usuario implements Serializable {
 
     public void setPerfil(String perfil) {
         this.perfil = perfil;
+    }
+
+    public Integer getIdFilial() {
+        return idFilial;
+    }
+
+    public void setIdFilial(Integer idFilial) {
+        this.idFilial = idFilial;
     }
 }
