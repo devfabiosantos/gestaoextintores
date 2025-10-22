@@ -1,4 +1,3 @@
-<%-- Adiciona as tags necessárias para um arquivo JSP --%>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -28,21 +27,25 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100">
-                                <div class="card-header bg-primary text-white">
-                                    <h4>Gestão de Filiais</h4>
-                                </div>
-                                <div class="card-body">
-                                    <p>Cadastre e gerencie as filiais da empresa.</p>
-                                    <div class="d-grid gap-2">
-                                        <a href="${pageContext.request.contextPath}/FilialServlet?acao=listar" class="btn btn-outline-primary">Listar Filiais</a>
-                                        <a href="${pageContext.request.contextPath}/FilialServlet?acao=novo" class="btn btn-primary">Nova Filial</a>
+
+                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h4>Gestão de Filiais</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Cadastre e gerencie as filiais da empresa.</p>
+                                        <div class="d-grid gap-2">
+                                            <a href="${pageContext.request.contextPath}/FilialServlet?acao=listar" class="btn btn-outline-primary">Listar Filiais</a>
+                                            <a href="${pageContext.request.contextPath}/FilialServlet?acao=novo" class="btn btn-primary">Nova Filial</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
+                        </c:if>
+
+                        <div class="col-md-4 mb-4">
                             <div class="card h-100">
                                 <div class="card-header bg-danger text-white">
                                     <h4>Gestão de Extintores</h4>
@@ -56,6 +59,38 @@
                                 </div>
                             </div>
                         </div>
+
+                         <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h4>Gestão de Remessas</h4>
+                                </div>
+                                <div class="card-body">
+                                    <p>Crie e gerencie as remessas para recarga.</p>
+                                    <div class="d-grid gap-2">
+                                        <a href="${pageContext.request.contextPath}/RemessaServlet?acao=listar" class="btn btn-outline-success">Listar Remessas</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
+                             <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h4>Gestão de Usuários</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Cadastre e gerencie os usuários do sistema.</p>
+                                        <div class="d-grid gap-2">
+                                            <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=listar" class="btn btn-outline-secondary">Listar Usuários</a>
+                                            <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=novo" class="btn btn-secondary">Novo Usuário</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
+
                     </div>
                 </div>
                 <div class="card-footer text-center text-muted">

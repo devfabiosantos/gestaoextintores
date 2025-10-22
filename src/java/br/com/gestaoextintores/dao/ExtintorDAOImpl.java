@@ -25,7 +25,7 @@ public class ExtintorDAOImpl {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             conn.setAutoCommit(false);
-            
+
             stmt.setString(1, extintor.getTipoEquipamento());
             stmt.setString(2, extintor.getNumeroControle());
             stmt.setString(3, extintor.getClasseExtintora());
@@ -49,14 +49,12 @@ public class ExtintorDAOImpl {
 
     public List<Extintor> listar(Usuario usuarioLogado) {
         List<Extintor> resultado = new ArrayList<>();
-
         String sql = "SELECT e.* FROM extintor e " +
                      "JOIN setor s ON e.id_setor = s.id_setor";
 
         if ("Técnico".equals(usuarioLogado.getPerfil())) {
             sql += " WHERE s.id_filial = ?";
         }
-        
         sql += " ORDER BY e.id_extintor";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -80,7 +78,7 @@ public class ExtintorDAOImpl {
     public Extintor carregar(int idExtintor, Usuario usuarioLogado) {
         Extintor extintor = null;
         String sql = "SELECT e.* FROM extintor e " +
-                     "JOIN setor s ON e.id_setor = s.id_setor " + // JOIN para segurança
+                     "JOIN setor s ON e.id_setor = s.id_setor " +
                      "WHERE e.id_extintor = ?";
 
         if ("Técnico".equals(usuarioLogado.getPerfil())) {
@@ -91,7 +89,6 @@ public class ExtintorDAOImpl {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, idExtintor);
-
             if ("Técnico".equals(usuarioLogado.getPerfil())) {
                 stmt.setInt(2, usuarioLogado.getIdFilial());
             }
@@ -133,7 +130,6 @@ public class ExtintorDAOImpl {
             stmt.setString(8, extintor.getObservacao());
             stmt.setInt(9, extintor.getIdSetor());
             stmt.setInt(10, extintor.getIdStatus());
-
             stmt.setInt(11, extintor.getIdExtintor());
 
             if ("Técnico".equals(usuarioLogado.getPerfil())) {
@@ -161,19 +157,70 @@ public class ExtintorDAOImpl {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             conn.setAutoCommit(false);
-
             stmt.setInt(1, idExtintor);
-
             if ("Técnico".equals(usuarioLogado.getPerfil())) {
                 stmt.setInt(2, usuarioLogado.getIdFilial());
             }
-
             stmt.executeUpdate();
             conn.commit();
             return true;
 
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao excluir extintor!", ex);
+            return false;
+        }
+    }
+
+    public boolean atualizarStatusVarios(List<Integer> idsExtintores, int idNovoStatus, Usuario usuarioLogado) {
+        if (idsExtintores == null || idsExtintores.isEmpty()) {
+            return true;
+        }
+
+        StringBuilder sql = new StringBuilder(
+            "UPDATE extintor SET id_status = ? WHERE id_extintor IN ("
+        );
+        for (int i = 0; i < idsExtintores.size(); i++) {
+            sql.append("?");
+            if (i < idsExtintores.size() - 1) {
+                sql.append(",");
+            }
+        }
+        sql.append(")");
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+             sql.append(" AND id_setor IN (SELECT id_setor FROM setor WHERE id_filial = ?)");
+        }
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            conn.setAutoCommit(false);
+
+            stmt.setInt(1, idNovoStatus);
+
+            int index = 2;
+            for (Integer idExtintor : idsExtintores) {
+                stmt.setInt(index++, idExtintor);
+            }
+
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                 stmt.setInt(index, usuarioLogado.getIdFilial());
+            }
+
+            int affectedRows = stmt.executeUpdate();
+            conn.commit();
+
+            if (affectedRows == idsExtintores.size()) {
+                 LOGGER.log(Level.INFO, "{0} extintores tiveram status atualizado para {1}", new Object[]{affectedRows, idNovoStatus});
+                 return true;
+            } else {
+                 LOGGER.log(Level.WARNING, "Número inesperado de extintores atualizados ({0} em vez de {1}) para status {2}",
+                           new Object[]{affectedRows, idsExtintores.size(), idNovoStatus});
+                 return false;
+            }
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao atualizar status de múltiplos extintores!", ex);
             return false;
         }
     }
