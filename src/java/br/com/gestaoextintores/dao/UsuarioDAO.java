@@ -84,6 +84,38 @@ public class UsuarioDAO {
             if (conn != null) { try { ConnectionFactory.closeConnection(conn); } catch (Exception closeEx) { LOGGER.log(Level.SEVERE, "Erro ao fechar conexão!", closeEx); } }
         }
     }
+    
+    public List<Usuario> listar(Integer idFilialFiltro) {
+        List<Usuario> resultado = new ArrayList<>();
+        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.perfil, u.id_filial, " +
+                     "       f.id_filial AS f_id_filial, f.nome AS nome_filial, f.endereco AS endereco_filial " +
+                     "FROM usuario u " +
+                     "LEFT JOIN filial f ON u.id_filial = f.id_filial ";
+
+        if (idFilialFiltro != null) {
+             //sql += " WHERE u.id_filial = ? OR u.perfil = 'Admin'"; //Essa é a primeira lógica
+             sql += " WHERE u.id_filial = ?";
+        }
+        
+        sql += " ORDER BY u.nome";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            if (idFilialFiltro != null) {
+                stmt.setInt(1, idFilialFiltro);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    resultado.add(popularUsuario(rs));
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao listar usuários com filtro!", ex);
+        }
+        return resultado;
+    }
 
     public List<Usuario> listar() {
         List<Usuario> resultado = new ArrayList<>();

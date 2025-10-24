@@ -23,77 +23,65 @@
         </div>
         <div class="card-body">
 
-            <c:if test="${not empty sessionScope.mensagemSucesso}">
-                <div class="alert alert-success text-center">${sessionScope.mensagemSucesso}</div>
-                <c:remove var="mensagemSucesso" scope="session"/>
-            </c:if>
-            <c:if test="${not empty sessionScope.mensagemErro}">
-                <div class="alert alert-danger text-center">${sessionScope.mensagemErro}</div>
-                <c:remove var="mensagemErro" scope="session"/>
+            <c:if test="${not empty sessionScope.mensagemSucesso}"><div class="alert alert-success text-center">${sessionScope.mensagemSucesso}</div><c:remove var="mensagemSucesso" scope="session"/></c:if>
+            <c:if test="${not empty sessionScope.mensagemErro}"><div class="alert alert-danger text-center">${sessionScope.mensagemErro}</div><c:remove var="mensagemErro" scope="session"/></c:if>
+
+            <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
+                <form action="${pageContext.request.contextPath}/RemessaServlet" method="get" class="mb-4 border p-3 rounded bg-white">
+                     <input type="hidden" name="acao" value="listar" /> 
+                     <div class="row g-3 align-items-end">
+                         <div class="col-md-6">
+                             <label for="idFilialFiltro" class="form-label fw-bold">Filtrar por Filial:</label>
+                             <select name="idFilialFiltro" id="idFilialFiltro" class="form-select form-select-sm">
+                                 <option value="" ${empty idFilialSelecionada ? 'selected' : ''}>Todas as Filiais</option>
+                                 <%-- O Servlet DEVE enviar 'listaTodasFiliais' para o Admin --%>
+                                 <c:forEach var="filial" items="${listaTodasFiliais}">
+                                     <option value="${filial.idFilial}" 
+                                             <c:if test="${not empty idFilialSelecionada and idFilialSelecionada == filial.idFilial}">selected</c:if>>
+                                         <c:out value="${filial.nome}"/>
+                                     </option>
+                                 </c:forEach>
+                             </select>
+                         </div>
+                         <div class="col-md-3">
+                             <button type="submit" class="btn btn-primary btn-sm w-100">Filtrar</button>
+                         </div>
+                     </div>
+                 </form>
             </c:if>
 
             <c:choose>
                 <c:when test="${empty listaRemessas}">
-                    <div class="alert alert-info text-center">Nenhuma remessa encontrada.</div>
+                    <div class="alert alert-info text-center">Nenhuma remessa encontrada ${not empty idFilialSelecionada ? 'para esta filial' : ''}.</div>
                 </c:when>
                 <c:otherwise>
                     <div class="table-responsive">
                         <table class="table table-striped table-hover align-middle">
                             <thead class="table-dark text-center">
                                 <tr>
-                                    <th>ID Remessa</th>
-                                    <th>Data Criação</th>
-                                    <th>Filial ID</th>
-                                    <th>Técnico ID</th>
-                                    <th>Status</th>
-                                    <th>Data Aprovação</th>
-                                    <th>Admin ID</th>
+                                    <th>ID Remessa</th> <th>Data Criação</th> <th>Filial ID</th> <th>Técnico ID</th>
+                                    <th>Status</th> <th>Data Aprovação</th> <th>Admin ID</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody class="text-center">
                                 <c:forEach var="remessa" items="${listaRemessas}">
                                     <tr>
-                                        <td>${remessa.idRemessa}</td>
-                                        <td><fmt:formatDate value="${remessa.dataCriacao}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                        <td>${remessa.idFilial}</td>
-                                        <td>${remessa.idUsuarioTecnico}</td>
-                                        <td>${remessa.statusRemessa}</td>
-                                        <td><fmt:formatDate value="${remessa.dataAprovacao}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                        <td>${remessa.idRemessa}</td> <td><fmt:formatDate value="${remessa.dataCriacao}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                        <td>${remessa.idFilial}</td> <td>${remessa.idUsuarioTecnico}</td>
+                                        <td>${remessa.statusRemessa}</td> <td><fmt:formatDate value="${remessa.dataAprovacao}" pattern="dd/MM/yyyy HH:mm"/></td>
                                         <td>${remessa.idUsuarioAdmin != null ? remessa.idUsuarioAdmin : '-'}</td>
                                         <td class="text-center">
-                                            <a href="${pageContext.request.contextPath}/RemessaServlet?acao=detalhar&idRemessa=${remessa.idRemessa}"
-                                               class="btn btn-sm btn-info me-1">Detalhar</a>
-
+                                            <a href="${pageContext.request.contextPath}/RemessaServlet?acao=detalhar&idRemessa=${remessa.idRemessa}" class="btn btn-sm btn-info me-1">Detalhar</a>
                                             <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin' and remessa.statusRemessa == 'Enviado'}">
-                                                <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" style="display: inline;">
-                                                    <input type="hidden" name="acao" value="aprovarRecolhimento"/>
-                                                    <input type="hidden" name="idRemessa" value="${remessa.idRemessa}"/>
-                                                    <button type="submit" class="btn btn-sm btn-primary"
-                                                            onclick="return confirm('Confirmar aprovação para recolhimento desta remessa?');">
-                                                        Aprovar p/ Recolhimento
-                                                    </button>
-                                                </form>
+                                                <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" style="display: inline;"><input type="hidden" name="acao" value="aprovarRecolhimento"/><input type="hidden" name="idRemessa" value="${remessa.idRemessa}"/><button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Confirmar aprovação?');">Aprovar p/ Recolhimento</button></form>
                                             </c:if>
-
                                             <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico' and remessa.statusRemessa == 'Aprovado p/ Recolhimento'}">
-                                                 <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" style="display: inline;">
-                                                     <input type="hidden" name="acao" value="confirmarRecolhimento"/>
-                                                     <input type="hidden" name="idRemessa" value="${remessa.idRemessa}"/>
-                                                     <button type="submit" class="btn btn-sm btn-success"
-                                                            onclick="return confirm('Confirmar que os extintores desta remessa foram recolhidos pela empresa de recarga? O status deles será alterado para Em Recarga.');">
-                                                         Confirmar Recolhimento
-                                                     </button>
-                                                 </form>
+                                                 <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" style="display: inline;"><input type="hidden" name="acao" value="confirmarRecolhimento"/><input type="hidden" name="idRemessa" value="${remessa.idRemessa}"/><button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Confirmar recolhimento?');">Confirmar Recolhimento</button></form>
                                             </c:if>
-                                               
                                             <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico' and remessa.statusRemessa == 'Em Recarga'}">
-                                                     <a href="${pageContext.request.contextPath}/RemessaServlet?acao=prepararRecebimento&idRemessa=${remessa.idRemessa}"
-                                                        class="btn btn-sm btn-info">
-                                                         Confirmar Recebimento
-                                                     </a>
-                                            </c:if>                                               
-
+                                                 <a href="${pageContext.request.contextPath}/RemessaServlet?acao=prepararRecebimento&idRemessa=${remessa.idRemessa}" class="btn btn-sm btn-info">Confirmar Recebimento</a>
+                                            </c:if>
                                         </td>
                                     </tr>
                                 </c:forEach>

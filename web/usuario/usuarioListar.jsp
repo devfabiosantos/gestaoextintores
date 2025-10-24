@@ -24,10 +24,31 @@
             </a>
         </div>
         <div class="card-body">
-
+            <form action="${pageContext.request.contextPath}/UsuarioServlet" method="get" class="mb-4">
+                 <%-- A ação é sempre 'listar' ao filtrar --%>
+                 <input type="hidden" name="acao" value="listar" /> 
+                 
+                 <div class="row g-3 align-items-end">
+                     <div class="col-md-6">
+                         <label for="idFilialFiltro" class="form-label">Filtrar por Filial:</label>
+                         <select name="idFilialFiltro" id="idFilialFiltro" class="form-select">
+                             <option value="" ${empty idFilialSelecionada ? 'selected' : ''}>Todas as Filiais</option>
+                             <c:forEach var="filial" items="${listaTodasFiliais}">
+                                 <option value="${filial.idFilial}" 
+                                         <c:if test="${not empty idFilialSelecionada and idFilialSelecionada == filial.idFilial}">selected</c:if>>
+                                     <c:out value="${filial.nome}"/>
+                                 </option>
+                             </c:forEach>
+                         </select>
+                     </div>
+                     <div class="col-md-2">
+                         <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                     </div>
+                 </div>
+             </form>
             <c:choose>
                 <c:when test="${empty listaUsuarios}">
-                    <div class="alert alert-info text-center">Nenhum usuário cadastrado.</div>
+                    <div class="alert alert-info text-center">Nenhum usuário encontrado ${not empty idFilialSelecionada ? 'para esta filial' : ''}.</div>
                 </c:when>
                 <c:otherwise>
                     <div class="table-responsive">
@@ -38,7 +59,7 @@
                                     <th>Nome</th>
                                     <th>Login</th>
                                     <th>Perfil</th>
-                                    <th>Filial</th>
+                                    <th>Filial</th> 
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
@@ -50,12 +71,8 @@
                                         <td>${usuario.login}</td>
                                         <td>${usuario.perfil}</td>
                                         <td>
-                                            <c:if test="${not empty usuario.filial}">
-                                                ${usuario.filial.nome}
-                                            </c:if>
-                                            <c:if test="${empty usuario.filial}">
-                                                -
-                                            </c:if>
+                                            <c:if test="${not empty usuario.filial}">${usuario.filial.nome}</c:if>
+                                            <c:if test="${empty usuario.filial}">-</c:if>
                                         </td>
                                         <td class="text-center">
                                             <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=editar&idUsuario=${usuario.idUsuario}"

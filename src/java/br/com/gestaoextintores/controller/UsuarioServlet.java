@@ -50,19 +50,33 @@ public class UsuarioServlet extends HttpServlet {
         if (!isAdmin(request, response)) {
             return;
         }
-
+        
         HttpSession sessao = request.getSession(false);
         Usuario usuarioLogado = (Usuario) sessao.getAttribute("usuarioLogado");
-
         String acao = request.getParameter("acao");
 
         try {
             UsuarioDAO usuarioDAO = new UsuarioDAO();
             FilialDAOImpl filialDAO = new FilialDAOImpl();
-
             if (acao == null || acao.equals("listar")) {
-                List<Usuario> listaUsuarios = usuarioDAO.listar();
+
+                String idFilialFiltroStr = request.getParameter("idFilialFiltro");
+                Integer idFilialFiltro = null;
+                if (idFilialFiltroStr != null && !idFilialFiltroStr.isEmpty()) {
+                    try {
+                        idFilialFiltro = Integer.parseInt(idFilialFiltroStr);
+                    } catch (NumberFormatException e) {
+                        LOGGER.log(Level.WARNING, "ID de filial inválido recebido no filtro: {0}", idFilialFiltroStr);
+                    }
+                }
+
+                List<Usuario> listaUsuarios = usuarioDAO.listar(idFilialFiltro); 
+                List<Filial> listaTodasFiliais = filialDAO.listar(usuarioLogado); 
+
                 request.setAttribute("listaUsuarios", listaUsuarios);
+                request.setAttribute("listaTodasFiliais", listaTodasFiliais);
+                request.setAttribute("idFilialSelecionada", idFilialFiltro);
+
                 RequestDispatcher rd = request.getRequestDispatcher("/usuario/usuarioListar.jsp");
                 rd.forward(request, response);
 
@@ -73,25 +87,21 @@ public class UsuarioServlet extends HttpServlet {
                 rd.forward(request, response);
 
             } else if (acao.equals("editar")) {
-                int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
-                Usuario usuario = usuarioDAO.carregar(idUsuario);
-                
-                if (usuario == null) {
-                   response.sendError(HttpServletResponse.SC_NOT_FOUND, "Usuário não encontrado.");
-                   return;
-                }
-
-                List<Filial> listaFiliais = filialDAO.listar(usuarioLogado); 
-                
-                request.setAttribute("usuario", usuario);
-                request.setAttribute("listaFiliais", listaFiliais);
-                RequestDispatcher rd = request.getRequestDispatcher("/usuario/usuarioEditar.jsp");
-                rd.forward(request, response);
+                 int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
+                 Usuario usuario = usuarioDAO.carregar(idUsuario);
+                 if (usuario == null) {
+                     return; 
+                 }
+                 List<Filial> listaFiliais = filialDAO.listar(usuarioLogado); 
+                 request.setAttribute("usuario", usuario);
+                 request.setAttribute("listaFiliais", listaFiliais);
+                 RequestDispatcher rd = request.getRequestDispatcher("/usuario/usuarioEditar.jsp");
+                 rd.forward(request, response);
 
             } else if (acao.equals("excluir")) {
-                int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
-                usuarioDAO.excluir(idUsuario);
-                response.sendRedirect(request.getContextPath() + "/UsuarioServlet?acao=listar");
+                 int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
+                 usuarioDAO.excluir(idUsuario);
+                 response.sendRedirect(request.getContextPath() + "/UsuarioServlet?acao=listar");
             }
 
         } catch (Exception ex) {

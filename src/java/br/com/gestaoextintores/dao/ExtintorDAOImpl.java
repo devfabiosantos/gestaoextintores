@@ -43,26 +43,30 @@ public class ExtintorDAOImpl {
         }
     }
 
-    public List<Extintor> listar(Usuario usuarioLogado) {
+    public List<Extintor> listar(Usuario usuarioLogado, Integer idFilialFiltro) {
         List<Extintor> resultado = new ArrayList<>();
-        String sql = "SELECT e.*, " +
-                     "       s.nome AS nome_setor, s.id_filial, " +
-                     "       st.nome AS nome_status " +
+        String sql = "SELECT e.*, s.nome AS nome_setor, s.id_filial, st.nome AS nome_status " +
                      "FROM extintor e " +
                      "JOIN setor s ON e.id_setor = s.id_setor " +
                      "LEFT JOIN statusextintor st ON e.id_status = st.id_status ";
 
+        Integer idFilialParaFiltrar = null;
+
         if ("Técnico".equals(usuarioLogado.getPerfil())) {
             sql += " WHERE s.id_filial = ?";
+            idFilialParaFiltrar = usuarioLogado.getIdFilial();
+        } else if ("Admin".equals(usuarioLogado.getPerfil()) && idFilialFiltro != null) {
+            sql += " WHERE s.id_filial = ?";
+            idFilialParaFiltrar = idFilialFiltro;
         }
-        
+
         sql += " ORDER BY e.id_extintor";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            if ("Técnico".equals(usuarioLogado.getPerfil())) {
-                stmt.setInt(1, usuarioLogado.getIdFilial());
+            if (idFilialParaFiltrar != null) {
+                stmt.setInt(1, idFilialParaFiltrar);
             }
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -71,7 +75,7 @@ public class ExtintorDAOImpl {
                 }
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao listar extintores!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao listar extintores com filtro!", ex);
         }
         return resultado;
     }

@@ -63,29 +63,36 @@ public class RemessaDAO {
         }
     }
 
-    public List<Remessa> listar(Usuario usuarioLogado) {
+    public List<Remessa> listar(Usuario usuarioLogado, Integer idFilialFiltro) {
         List<Remessa> resultado = new ArrayList<>();
         String sql = "SELECT * FROM remessa";
+        
+        Integer idFilialParaFiltrar = null;
 
         if ("Técnico".equals(usuarioLogado.getPerfil())) {
             sql += " WHERE id_filial = ?";
+            idFilialParaFiltrar = usuarioLogado.getIdFilial();
+        } else if ("Admin".equals(usuarioLogado.getPerfil()) && idFilialFiltro != null) {
+            sql += " WHERE id_filial = ?";
+            idFilialParaFiltrar = idFilialFiltro;
         }
+
         sql += " ORDER BY data_criacao DESC";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            if ("Técnico".equals(usuarioLogado.getPerfil())) {
-                stmt.setInt(1, usuarioLogado.getIdFilial());
+            if (idFilialParaFiltrar != null) {
+                stmt.setInt(1, idFilialParaFiltrar);
             }
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    resultado.add(popularRemessa(rs));
+                    resultado.add(popularRemessa(rs)); 
                 }
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao listar remessas!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao listar remessas com filtro!", ex);
         }
         return resultado;
     }

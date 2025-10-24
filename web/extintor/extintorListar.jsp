@@ -29,73 +29,59 @@
                 <c:remove var="mensagemErro" scope="session"/>
             </c:if>
 
+            <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
+                <form action="${pageContext.request.contextPath}/ExtintorServlet" method="get" class="mb-4 border p-3 rounded bg-white">
+                     <input type="hidden" name="acao" value="listar" /> 
+                     <div class="row g-3 align-items-end">
+                         <div class="col-md-6">
+                             <label for="idFilialFiltro" class="form-label fw-bold">Filtrar por Filial:</label>
+                             <select name="idFilialFiltro" id="idFilialFiltro" class="form-select form-select-sm">
+                                 <option value="" ${empty idFilialSelecionada ? 'selected' : ''}>Todas as Filiais</option>
+                                 <c:forEach var="filial" items="${listaTodasFiliais}">
+                                     <option value="${filial.idFilial}" 
+                                             <c:if test="${not empty idFilialSelecionada and idFilialSelecionada == filial.idFilial}">selected</c:if>>
+                                         <c:out value="${filial.nome}"/>
+                                     </option>
+                                 </c:forEach>
+                             </select>
+                         </div>
+                         <div class="col-md-3">
+                             <button type="submit" class="btn btn-primary btn-sm w-100">Filtrar</button>
+                         </div>
+                     </div>
+                 </form>
+            </c:if>
+
             <form action="${pageContext.request.contextPath}/RemessaServlet" method="post">
                 <input type="hidden" name="acao" value="criar"/>
 
                 <c:choose>
                     <c:when test="${empty listaExtintores}">
-                        <div class="alert alert-info text-center">Nenhum extintor cadastrado para esta filial.</div>
+                        <div class="alert alert-info text-center">Nenhum extintor encontrado ${not empty idFilialSelecionada ? 'para esta filial' : ''}.</div>
                     </c:when>
                     <c:otherwise>
                         <div class="table-responsive">
                             <table class="table table-striped table-hover align-middle">
                                 <thead class="table-dark text-center">
                                     <tr>
-                                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}">
-                                            <th>Selecionar</th>
-                                        </c:if>
-                                        <th>ID</th>
-                                        <th>Nº Controle</th>
-                                        <th>Equipamento</th>
-                                        <th>Classe</th>
-                                        <th>Carga</th>
-                                        <th>Localização</th>
-                                        <th>Validade</th>
-                                        <th>Setor</th> <%-- CABEÇALHO ATUALIZADO --%>
-                                        <th>Status</th> <%-- CABEÇALHO ATUALIZADO --%>
+                                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}"><th>Selecionar</th></c:if>
+                                        <th>ID</th> <th>Nº Controle</th> <th>Equipamento</th> <th>Classe</th>
+                                        <th>Carga</th> <th>Localização</th> <th>Validade</th> <th>Setor</th> <th>Status</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-center">
                                     <c:forEach var="extintor" items="${listaExtintores}">
                                         <tr>
-                                            <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}">
-                                                <td>
-                                                    <input class="form-check-input" type="checkbox"
-                                                           name="extintoresSelecionados"
-                                                           value="${extintor.idExtintor}">
-                                                </td>
-                                            </c:if>
-                                            <td>${extintor.idExtintor}</td>
-                                            <td>${extintor.numeroControle}</td>
-                                            <td>${extintor.tipoEquipamento}</td>
-                                            <td>${extintor.classeExtintora}</td>
-                                            <td>${extintor.cargaNominal}</td>
-                                            <td>${extintor.referenciaLocalizacao}</td>
-                                            <td><fmt:formatDate value="${extintor.dataValidade}" pattern="dd/MM/yyyy"/></td>
-                                            <td>
-                                                <c:if test="${not empty extintor.setor}">
-                                                    ${extintor.setor.nome}
-                                                </c:if>
-                                                <c:if test="${empty extintor.setor}">
-                                                    ID: ${extintor.idSetor}
-                                                </c:if>
-                                            </td>
-                                            <td>
-                                                <c:if test="${not empty extintor.status}">
-                                                    ${extintor.status.nome}
-                                                </c:if>
-                                                 <c:if test="${empty extintor.status}">
-                                                    ID: ${extintor.idStatus}
-                                                </c:if>
-                                            </td>
+                                            <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}"><td><input class="form-check-input" type="checkbox" name="extintoresSelecionados" value="${extintor.idExtintor}"></td></c:if>
+                                            <td>${extintor.idExtintor}</td> <td>${extintor.numeroControle}</td> <td>${extintor.tipoEquipamento}</td> <td>${extintor.classeExtintora}</td>
+                                            <td>${extintor.cargaNominal}</td> <td>${extintor.referenciaLocalizacao}</td> <td><fmt:formatDate value="${extintor.dataValidade}" pattern="dd/MM/yyyy"/></td>
+                                            <td><c:if test="${not empty extintor.setor}">${extintor.setor.nome}</c:if><c:if test="${empty extintor.setor}">ID: ${extintor.idSetor}</c:if></td>
+                                            <td><c:if test="${not empty extintor.status}">${extintor.status.nome}</c:if><c:if test="${empty extintor.status}">ID: ${extintor.idStatus}</c:if></td>
                                             <td class="text-center">
                                                 <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
-                                                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=editar&idExtintor=${extintor.idExtintor}"
-                                                       class="btn btn-sm btn-warning me-1">Editar</a>
-                                                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=excluir&idExtintor=${extintor.idExtintor}"
-                                                       class="btn btn-sm btn-danger"
-                                                       onclick="return confirm('Deseja realmente excluir este extintor?');">Excluir</a>
+                                                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=editar&idExtintor=${extintor.idExtintor}" class="btn btn-sm btn-warning me-1">Editar</a>
+                                                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=excluir&idExtintor=${extintor.idExtintor}" class="btn btn-sm btn-danger" onclick="return confirm('Deseja realmente excluir?');">Excluir</a>
                                                 </c:if>
                                             </td>
                                         </tr>
@@ -103,16 +89,9 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}">
-                             <div class="d-flex justify-content-end mt-3">
-                                <button type="submit" class="btn btn-success">Criar Remessa com Selecionados</button>
-                            </div>
-                        </c:if>
-
+                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}"><div class="d-flex justify-content-end mt-3"><button type="submit" class="btn btn-success">Criar Remessa com Selecionados</button></div></c:if>
                     </c:otherwise>
                 </c:choose>
-
             </form>
 
             <div class="mt-3">

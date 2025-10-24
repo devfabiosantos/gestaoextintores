@@ -11,12 +11,13 @@ package br.com.gestaoextintores.controller;
  * @author Dev Fabio Santos
  */
 import br.com.gestaoextintores.dao.ExtintorDAOImpl;
+import br.com.gestaoextintores.dao.FilialDAOImpl;
 import br.com.gestaoextintores.dao.RemessaDAO;
 import br.com.gestaoextintores.dao.RemessaItemDAO; // Importado
 import br.com.gestaoextintores.dao.StatusExtintorDAOImpl;
+import br.com.gestaoextintores.model.Filial;
 import br.com.gestaoextintores.model.Remessa;
 import br.com.gestaoextintores.model.RemessaItem; // Importado
-import br.com.gestaoextintores.model.StatusExtintor;
 import br.com.gestaoextintores.model.Usuario;
 import java.io.IOException;
 import java.text.ParseException; // Import ParseException
@@ -24,7 +25,6 @@ import java.text.SimpleDateFormat; // Import SimpleDateFormat
 import java.util.ArrayList;
 import java.util.Date; // Import java.util.Date
 import java.util.List;
-import java.util.Map; // Import Map
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
@@ -51,43 +51,46 @@ public class RemessaServlet extends HttpServlet {
         HttpSession sessao = request.getSession(false);
         Usuario usuarioLogado = (sessao != null) ? (Usuario) sessao.getAttribute("usuarioLogado") : null;
         if (usuarioLogado == null) {
-            response.sendRedirect(request.getContextPath() + "/LoginServlet");
-            return;
+            return; 
         }
 
         String acao = request.getParameter("acao");
         RemessaDAO remessaDAO = new RemessaDAO();
-        RemessaItemDAO itemDAO = new RemessaItemDAO(); // Mover para cá para usar no detalhar
+        RemessaItemDAO itemDAO = new RemessaItemDAO(); 
+        FilialDAOImpl filialDAO = new FilialDAOImpl();
 
         try {
-            // Ação: LISTAR
             if (acao == null || "listar".equals(acao)) {
-                List<Remessa> listaRemessas = remessaDAO.listar(usuarioLogado);
+
+                String idFilialFiltroStr = request.getParameter("idFilialFiltro");
+                Integer idFilialFiltro = null;
+                if ("Admin".equals(usuarioLogado.getPerfil()) && idFilialFiltroStr != null && !idFilialFiltroStr.isEmpty()) {
+                    try { idFilialFiltro = Integer.parseInt(idFilialFiltroStr); } 
+                    catch (NumberFormatException e) {
+                    }
+                }
+
+                List<Remessa> listaRemessas = remessaDAO.listar(usuarioLogado, idFilialFiltro); 
+
+                List<Filial> listaTodasFiliais = null;
+                if ("Admin".equals(usuarioLogado.getPerfil())) {
+                    listaTodasFiliais = filialDAO.listar(usuarioLogado); 
+                }
+
                 request.setAttribute("listaRemessas", listaRemessas);
+                if (listaTodasFiliais != null) { 
+                    request.setAttribute("listaTodasFiliais", listaTodasFiliais); 
+                }
+                request.setAttribute("idFilialSelecionada", idFilialFiltro); 
+
                 RequestDispatcher rd = request.getRequestDispatcher("/remessa/remessaListar.jsp"); 
                 rd.forward(request, response);
-            } 
-            // AÇÃO: DETALHAR (Implementada)
-            else if ("detalhar".equals(acao)) {
-                int idRemessa = Integer.parseInt(request.getParameter("idRemessa"));
-                Remessa remessa = remessaDAO.carregar(idRemessa, usuarioLogado);
-                if (remessa == null) {
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Remessa não encontrada ou acesso negado."); return;
-                }
-                List<Map<String, Object>> resumoItens = itemDAO.getResumoItensPorClasse(idRemessa);
-                List<RemessaItem> listaItensDetalhada = itemDAO.listarPorRemessa(idRemessa);
-                request.setAttribute("remessa", remessa);
-                request.setAttribute("resumoItens", resumoItens);
-                request.setAttribute("listaItensDetalhada", listaItensDetalhada);
+
+            } else if ("detalhar".equals(acao)) {
                 RequestDispatcher rd = request.getRequestDispatcher("/remessa/remessaDetalhe.jsp");
                 rd.forward(request, response);
             }
-            // AÇÃO: PREPARAR RECEBIMENTO (Técnico)
             else if ("prepararRecebimento".equals(acao)) {
-                 if (!"Técnico".equals(usuarioLogado.getPerfil())) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado."); return;
-                }
-                int idRemessa = Integer.parseInt(request.getParameter("idRemessa"));
                 RequestDispatcher rd = request.getRequestDispatcher("/remessa/remessaRecebimento.jsp");
                 rd.forward(request, response);
             }
@@ -95,27 +98,20 @@ public class RemessaServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação GET inválida: " + acao);
             }
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Erro no doGet do RemessaServlet", e);
-             throw new ServletException(e);
         }
     }
 
-    // --- doPost ATUALIZADO (Restaurando lógicas perdidas) ---
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Encoding primeiro!
         request.setCharacterEncoding("UTF-8");
-        
-        // 2. Log inicial (agora seguro)
+
         LOGGER.log(Level.INFO, ">>> RemessaServlet doPost() INICIADO! Acao: {0}", request.getParameter("acao"));
 
-        // 3. Pega sessão e usuário
         HttpSession sessao = request.getSession(false);
         Usuario usuarioLogado = (sessao != null) ? (Usuario) sessao.getAttribute("usuarioLogado") : null;
 
-        // 4. Segurança básica
         if (usuarioLogado == null) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado."); return;
         }
@@ -123,20 +119,16 @@ public class RemessaServlet extends HttpServlet {
         String acao = request.getParameter("acao");
 
         try {
-            // Instancia DAOs necessários
             RemessaDAO remessaDAO = new RemessaDAO();
             RemessaItemDAO itemDAO = new RemessaItemDAO();
             ExtintorDAOImpl extintorDAO = new ExtintorDAOImpl();
             StatusExtintorDAOImpl statusDAO = new StatusExtintorDAOImpl();
 
-            // --- AÇÃO: CRIAR (Técnico) ---
             if ("criar".equals(acao)) {
-                // Segurança Específica
                 if (!"Técnico".equals(usuarioLogado.getPerfil())) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Apenas Técnicos podem criar remessas."); return;
                 }
-                
-                // --- Lógica de Criar Remessa ---
+
                 String[] idsSelecionadosStr = request.getParameterValues("extintoresSelecionados");
                 if (idsSelecionadosStr == null || idsSelecionadosStr.length == 0) {
                      LOGGER.warning("Nenhum extintor selecionado.");
@@ -174,16 +166,12 @@ public class RemessaServlet extends HttpServlet {
                 LOGGER.info("Remessa criada com SUCESSO. Redirecionando...");
                 sessao.setAttribute("mensagemSucesso", "Remessa criada com sucesso!");
                 response.sendRedirect(request.getContextPath() + "/ExtintorServlet?acao=listar");
-                // --- Fim da Lógica de Criar Remessa ---
 
-            // --- AÇÃO: APROVAR P/ RECOLHIMENTO (Admin) ---
             } else if ("aprovarRecolhimento".equals(acao)) {
-                // Segurança Específica
                 if (!"Admin".equals(usuarioLogado.getPerfil())) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Apenas Administradores podem aprovar remessas."); return;
                 }
-                
-                // --- Lógica de Aprovar ---
+
                 int idRemessa = Integer.parseInt(request.getParameter("idRemessa"));
                 boolean aprovado = remessaDAO.aprovarParaRecolhimento(idRemessa, usuarioLogado.getIdUsuario());
                 if (aprovado) {
@@ -192,16 +180,12 @@ public class RemessaServlet extends HttpServlet {
                     sessao.setAttribute("mensagemErro", "Falha ao aprovar remessa ID " + idRemessa + ".");
                 }
                 response.sendRedirect(request.getContextPath() + "/RemessaServlet?acao=listar");
-                // --- Fim da Lógica de Aprovar ---
 
-            // --- AÇÃO: CONFIRMAR RECOLHIMENTO (Técnico) ---
             } else if ("confirmarRecolhimento".equals(acao)) {
-                // Segurança Específica
                  if (!"Técnico".equals(usuarioLogado.getPerfil())) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Apenas Técnicos podem confirmar o recolhimento."); return;
                 }
-                
-                // --- Lógica de Confirmar Recolhimento ---
+
                 int idRemessa = Integer.parseInt(request.getParameter("idRemessa"));
                 int idStatusEmRecarga = statusDAO.getIdPorNome(STATUS_EM_RECARGA);
                 if (idStatusEmRecarga == -1){ throw new ServletException("Status '" + STATUS_EM_RECARGA + "' não encontrado."); }
@@ -219,16 +203,12 @@ public class RemessaServlet extends HttpServlet {
                 }
                 sessao.setAttribute("mensagemSucesso", "Recolhimento da Remessa ID " + idRemessa + " confirmado! Extintores marcados como 'Em Recarga'.");
                 response.sendRedirect(request.getContextPath() + "/RemessaServlet?acao=listar");
-                // --- Fim da Lógica de Confirmar Recolhimento ---
 
-            // --- AÇÃO: FINALIZAR RECEBIMENTO (Técnico) ---
             } else if ("finalizarRecebimento".equals(acao)) {
-                // Segurança Específica
                 if (!"Técnico".equals(usuarioLogado.getPerfil())) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Apenas Técnicos podem confirmar o recebimento."); return;
                 }
-                
-                // --- Lógica de Finalizar Recebimento ---
+
                 int idRemessa = Integer.parseInt(request.getParameter("idRemessa"));
                 String dataRecargaRealStr = request.getParameter("dataRecargaReal");
                 String novaDataValidadeStr = request.getParameter("novaDataValidade");
@@ -261,19 +241,17 @@ public class RemessaServlet extends HttpServlet {
                 }
                 sessao.setAttribute("mensagemSucesso", "Recebimento da Remessa ID " + idRemessa + " confirmado! Extintores marcados como 'Operacional' e datas atualizadas.");
                 response.sendRedirect(request.getContextPath() + "/RemessaServlet?acao=listar");
-                // --- Fim da Lógica de Finalizar Recebimento ---
 
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação POST inválida: " + acao);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erro GERAL no doPost do RemessaServlet", e); // Loga o stack trace
+            LOGGER.log(Level.SEVERE, "Erro GERAL no doPost do RemessaServlet", e);
             sessao.setAttribute("mensagemErro", "Erro interno ao processar a requisição: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/RemessaServlet?acao=listar"); 
-            return; // Adicionado return
+            return;
         }
     }
-    // --- FIM do doPost ATUALIZADO ---
 
     @Override
     public String getServletInfo() {
