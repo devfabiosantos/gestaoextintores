@@ -38,7 +38,7 @@
                                     <th>Nome</th>
                                     <th>Login</th>
                                     <th>Perfil</th>
-                                    <th>ID Filial</th>
+                                    <th>Filial</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
@@ -49,7 +49,14 @@
                                         <td>${usuario.nome}</td>
                                         <td>${usuario.login}</td>
                                         <td>${usuario.perfil}</td>
-                                        <td>${usuario.idFilial != null ? usuario.idFilial : '-'}</td>
+                                        <td>
+                                            <c:if test="${not empty usuario.filial}">
+                                                ${usuario.filial.nome}
+                                            </c:if>
+                                            <c:if test="${empty usuario.filial}">
+                                                -
+                                            </c:if>
+                                        </td>
                                         <td class="text-center">
                                             <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=editar&idUsuario=${usuario.idUsuario}"
                                                class="btn btn-sm btn-warning me-1">Editar</a>

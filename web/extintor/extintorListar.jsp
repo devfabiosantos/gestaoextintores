@@ -19,6 +19,7 @@
             </a>
         </div>
         <div class="card-body">
+
             <c:if test="${not empty sessionScope.mensagemSucesso}">
                 <div class="alert alert-success text-center">${sessionScope.mensagemSucesso}</div>
                 <c:remove var="mensagemSucesso" scope="session"/>
@@ -50,8 +51,8 @@
                                         <th>Carga</th>
                                         <th>Localização</th>
                                         <th>Validade</th>
-                                        <th>Setor ID</th>
-                                        <th>Status ID</th>
+                                        <th>Setor</th> <%-- CABEÇALHO ATUALIZADO --%>
+                                        <th>Status</th> <%-- CABEÇALHO ATUALIZADO --%>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -60,8 +61,8 @@
                                         <tr>
                                             <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}">
                                                 <td>
-                                                    <input class="form-check-input" type="checkbox" 
-                                                           name="extintoresSelecionados" 
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="extintoresSelecionados"
                                                            value="${extintor.idExtintor}">
                                                 </td>
                                             </c:if>
@@ -72,13 +73,27 @@
                                             <td>${extintor.cargaNominal}</td>
                                             <td>${extintor.referenciaLocalizacao}</td>
                                             <td><fmt:formatDate value="${extintor.dataValidade}" pattern="dd/MM/yyyy"/></td>
-                                            <td>${extintor.idSetor}</td>
-                                            <td>${extintor.idStatus}</td>
+                                            <td>
+                                                <c:if test="${not empty extintor.setor}">
+                                                    ${extintor.setor.nome}
+                                                </c:if>
+                                                <c:if test="${empty extintor.setor}">
+                                                    ID: ${extintor.idSetor}
+                                                </c:if>
+                                            </td>
+                                            <td>
+                                                <c:if test="${not empty extintor.status}">
+                                                    ${extintor.status.nome}
+                                                </c:if>
+                                                 <c:if test="${empty extintor.status}">
+                                                    ID: ${extintor.idStatus}
+                                                </c:if>
+                                            </td>
                                             <td class="text-center">
                                                 <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
-                                                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=editar&idExtintor=${extintor.idExtintor}" 
+                                                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=editar&idExtintor=${extintor.idExtintor}"
                                                        class="btn btn-sm btn-warning me-1">Editar</a>
-                                                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=excluir&idExtintor=${extintor.idExtintor}" 
+                                                    <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=excluir&idExtintor=${extintor.idExtintor}"
                                                        class="btn btn-sm btn-danger"
                                                        onclick="return confirm('Deseja realmente excluir este extintor?');">Excluir</a>
                                                 </c:if>
@@ -94,10 +109,10 @@
                                 <button type="submit" class="btn btn-success">Criar Remessa com Selecionados</button>
                             </div>
                         </c:if>
-                        
+
                     </c:otherwise>
                 </c:choose>
-            
+
             </form>
 
             <div class="mt-3">

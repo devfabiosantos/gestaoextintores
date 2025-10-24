@@ -12,6 +12,8 @@ package br.com.gestaoextintores.model;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import br.com.gestaoextintores.model.Usuario;
+import br.com.gestaoextintores.model.Filial;
 
 public class Remessa implements Serializable {
     private int idRemessa;
