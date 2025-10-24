@@ -67,14 +67,32 @@
 
                                             <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin' and remessa.statusRemessa == 'Enviado'}">
                                                 <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" style="display: inline;">
-                                                    <input type="hidden" name="acao" value="aprovar"/>
+                                                    <input type="hidden" name="acao" value="aprovarRecolhimento"/>
                                                     <input type="hidden" name="idRemessa" value="${remessa.idRemessa}"/>
-                                                    <button type="submit" class="btn btn-sm btn-success"
-                                                            onclick="return confirm('Confirmar aprovação desta remessa? Os extintores serão marcados como Em Recarga.');">
-                                                        Aprovar
+                                                    <button type="submit" class="btn btn-sm btn-primary"
+                                                            onclick="return confirm('Confirmar aprovação para recolhimento desta remessa?');">
+                                                        Aprovar p/ Recolhimento
                                                     </button>
                                                 </form>
                                             </c:if>
+
+                                            <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico' and remessa.statusRemessa == 'Aprovado p/ Recolhimento'}">
+                                                 <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" style="display: inline;">
+                                                     <input type="hidden" name="acao" value="confirmarRecolhimento"/>
+                                                     <input type="hidden" name="idRemessa" value="${remessa.idRemessa}"/>
+                                                     <button type="submit" class="btn btn-sm btn-success"
+                                                            onclick="return confirm('Confirmar que os extintores desta remessa foram recolhidos pela empresa de recarga? O status deles será alterado para Em Recarga.');">
+                                                         Confirmar Recolhimento
+                                                     </button>
+                                                 </form>
+                                            </c:if>
+                                               
+                                            <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico' and remessa.statusRemessa == 'Em Recarga'}">
+                                                     <a href="${pageContext.request.contextPath}/RemessaServlet?acao=prepararRecebimento&idRemessa=${remessa.idRemessa}"
+                                                        class="btn btn-sm btn-info">
+                                                         Confirmar Recebimento
+                                                     </a>
+                                            </c:if>                                               
 
                                         </td>
                                     </tr>

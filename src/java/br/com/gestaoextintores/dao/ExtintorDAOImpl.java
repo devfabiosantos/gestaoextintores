@@ -224,6 +224,65 @@ public class ExtintorDAOImpl {
             return false;
         }
     }
+    
+    public boolean atualizarDadosPosRecarga(List<Integer> idsExtintores, int idStatusOperacional, 
+                                            java.util.Date novaDataRecarga, java.util.Date novaDataValidade, 
+                                            Usuario usuarioLogado) {
+        
+        if (idsExtintores == null || idsExtintores.isEmpty()) {
+            return true;
+        }
+
+        StringBuilder sql = new StringBuilder(
+            "UPDATE extintor SET id_status = ?, data_recarga = ?, data_validade = ? WHERE id_extintor IN ("
+        );
+        for (int i = 0; i < idsExtintores.size(); i++) {
+            sql.append("?");
+            if (i < idsExtintores.size() - 1) {
+                sql.append(",");
+            }
+        }
+        sql.append(")");
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+             sql.append(" AND id_setor IN (SELECT id_setor FROM setor WHERE id_filial = ?)");
+        }
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            conn.setAutoCommit(false);
+
+            stmt.setInt(1, idStatusOperacional);
+            stmt.setDate(2, new java.sql.Date(novaDataRecarga.getTime()));
+            stmt.setDate(3, new java.sql.Date(novaDataValidade.getTime()));
+
+            int index = 4;
+            for (Integer idExtintor : idsExtintores) {
+                stmt.setInt(index++, idExtintor);
+            }
+
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                 stmt.setInt(index, usuarioLogado.getIdFilial());
+            }
+
+            int affectedRows = stmt.executeUpdate();
+            conn.commit();
+
+            if (affectedRows == idsExtintores.size()) {
+                 LOGGER.log(Level.INFO, "{0} extintores tiveram dados pós-recarga atualizados", affectedRows);
+                 return true;
+            } else {
+                 LOGGER.log(Level.WARNING, "Número inesperado de extintores atualizados pós-recarga ({0} em vez de {1})", 
+                           new Object[]{affectedRows, idsExtintores.size()});
+                 return false; 
+            }
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao atualizar dados pós-recarga de múltiplos extintores!", ex);
+            return false;
+        }
+    }
 
     private Extintor popularExtintor(ResultSet rs) throws SQLException {
         Extintor extintor = new Extintor();

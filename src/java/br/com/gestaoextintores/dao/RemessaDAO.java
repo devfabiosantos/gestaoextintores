@@ -28,22 +28,25 @@ public class RemessaDAO {
         String sql = "INSERT INTO remessa (id_usuario_tecnico, id_filial, status_remessa, data_criacao) " +
                      "VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
         int idGerado = -1;
+        Connection conn = null;
 
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        try {
+            conn = ConnectionFactory.getConnection();
             conn.setAutoCommit(false);
 
-            stmt.setInt(1, remessa.getIdUsuarioTecnico());
-            stmt.setInt(2, remessa.getIdFilial());
-            stmt.setString(3, remessa.getStatusRemessa());
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setInt(1, remessa.getIdUsuarioTecnico());
+                stmt.setInt(2, remessa.getIdFilial());
+                stmt.setString(3, remessa.getStatusRemessa());
+                stmt.executeUpdate();
 
-            stmt.executeUpdate();
-
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    idGerado = generatedKeys.getInt(1);
-                    remessa.setIdRemessa(idGerado);
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        idGerado = generatedKeys.getInt(1);
+                        remessa.setIdRemessa(idGerado);
+                    } else {
+                         throw new SQLException("Falha ao obter ID gerado para remessa.");
+                    }
                 }
             }
 
@@ -53,7 +56,25 @@ public class RemessaDAO {
 
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao criar remessa!", ex);
+
+            if (conn != null) {
+                try {
+                    LOGGER.log(Level.WARNING, "Tentando rollback da transação de criar remessa.");
+                    conn.rollback();
+                } catch (SQLException rbEx) {
+                    LOGGER.log(Level.SEVERE, "Erro crítico ao tentar rollback!", rbEx);
+                }
+            }
             return -1;
+
+        } finally {
+            if (conn != null) {
+                try {
+                     ConnectionFactory.closeConnection(conn); 
+                } catch (Exception closeEx) {
+                     LOGGER.log(Level.SEVERE, "Erro ao fechar conexão após criar remessa!", closeEx);
+                }
+            }
         }
     }
 
@@ -64,7 +85,6 @@ public class RemessaDAO {
         if ("Técnico".equals(usuarioLogado.getPerfil())) {
             sql += " WHERE id_filial = ?";
         }
-
         sql += " ORDER BY data_criacao DESC";
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -112,26 +132,85 @@ public class RemessaDAO {
         return remessa;
     }
 
-    public boolean aprovarRemessa(int idRemessa, String novoStatus, int idUsuarioAdmin) {
+    public boolean aprovarParaRecolhimento(int idRemessa, int idUsuarioAdmin) {
         String sql = "UPDATE remessa SET status_remessa = ?, id_usuario_admin = ?, data_aprovacao = CURRENT_TIMESTAMP " +
                      "WHERE id_remessa = ?";
+        String NOVO_STATUS = "Aprovado p/ Recolhimento";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             conn.setAutoCommit(false);
-
-            stmt.setString(1, novoStatus);
+            stmt.setString(1, NOVO_STATUS);
             stmt.setInt(2, idUsuarioAdmin);
             stmt.setInt(3, idRemessa);
-
             int affectedRows = stmt.executeUpdate();
             conn.commit();
 
-            return affectedRows > 0;
+            if (affectedRows > 0) {
+                 LOGGER.log(Level.INFO, "Remessa ID {0} aprovada para recolhimento pelo Admin ID {1}", new Object[]{idRemessa, idUsuarioAdmin});
+                 return true;
+            } else {
+                 LOGGER.log(Level.WARNING, "Nenhuma remessa encontrada para aprovar (ID: {0})", idRemessa);
+                 return false;
+            }
 
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao aprovar remessa (ID: " + idRemessa + ")!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao aprovar remessa para recolhimento (ID: " + idRemessa + ")!", ex);
+            return false;
+        }
+    }
+
+    public boolean confirmarRecolhimento(int idRemessa) {
+        String sql = "UPDATE remessa SET status_remessa = ? WHERE id_remessa = ?";
+        String NOVO_STATUS = "Em Recarga";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            conn.setAutoCommit(false);
+            stmt.setString(1, NOVO_STATUS);
+            stmt.setInt(2, idRemessa);
+            int affectedRows = stmt.executeUpdate();
+            conn.commit();
+
+             if (affectedRows > 0) {
+                 LOGGER.log(Level.INFO, "Recolhimento confirmado para remessa ID {0}", idRemessa);
+                 return true;
+            } else {
+                 LOGGER.log(Level.WARNING, "Nenhuma remessa encontrada para confirmar recolhimento (ID: {0})", idRemessa);
+                 return false;
+            }
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao confirmar recolhimento da remessa (ID: " + idRemessa + ")!", ex);
+            return false;
+        }
+    }
+    
+    public boolean concluirRemessa(int idRemessa) {
+        String sql = "UPDATE remessa SET status_remessa = ? WHERE id_remessa = ?";
+        String NOVO_STATUS = "Concluído";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            conn.setAutoCommit(false);
+            stmt.setString(1, NOVO_STATUS);
+            stmt.setInt(2, idRemessa);
+            int affectedRows = stmt.executeUpdate();
+            conn.commit();
+
+             if (affectedRows > 0) {
+                 LOGGER.log(Level.INFO, "Remessa ID {0} marcada como Concluída.", idRemessa);
+                 return true;
+            } else {
+                 LOGGER.log(Level.WARNING, "Nenhuma remessa encontrada para concluir (ID: {0})", idRemessa);
+                 return false;
+            }
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao concluir remessa (ID: " + idRemessa + ")!", ex);
             return false;
         }
     }
@@ -143,10 +222,8 @@ public class RemessaDAO {
         remessa.setIdFilial(rs.getInt("id_filial"));
         remessa.setDataCriacao(rs.getTimestamp("data_criacao"));
         remessa.setStatusRemessa(rs.getString("status_remessa"));
-        
         remessa.setIdUsuarioAdmin(rs.getObject("id_usuario_admin") != null ? rs.getInt("id_usuario_admin") : null);
         remessa.setDataAprovacao(rs.getTimestamp("data_aprovacao"));
-
         return remessa;
     }
 }

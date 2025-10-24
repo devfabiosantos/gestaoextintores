@@ -14,7 +14,9 @@ import br.com.gestaoextintores.model.RemessaItem;
 import br.com.gestaoextintores.util.ConnectionFactory;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +47,6 @@ public class RemessaItemDAO {
             }
 
             int[] resultados = stmt.executeBatch();
-
             conn.commit();
 
             for (int resultado : resultados) {
@@ -87,5 +88,35 @@ public class RemessaItemDAO {
             LOGGER.log(Level.SEVERE, "Erro ao listar itens da remessa ID: " + idRemessa + "!", ex);
         }
         return resultado;
+    }
+
+    public List<Map<String, Object>> getResumoItensPorClasse(int idRemessa) {
+        List<Map<String, Object>> resumo = new ArrayList<>();
+        String sql = "SELECT " +
+                     "    e.classe_extintora, " +
+                     "    COUNT(ri.id_extintor) AS quantidade " +
+                     "FROM remessa_item ri " +
+                     "JOIN extintor e ON ri.id_extintor = e.id_extintor " +
+                     "WHERE ri.id_remessa = ? " +
+                     "GROUP BY e.classe_extintora " +
+                     "ORDER BY e.classe_extintora";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idRemessa);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> linha = new HashMap<>();
+                    linha.put("classe_extintora", rs.getString("classe_extintora"));
+                    linha.put("quantidade", rs.getInt("quantidade"));
+                    resumo.add(linha);
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao buscar resumo de itens da remessa ID: " + idRemessa, ex);
+        }
+        return resumo;
     }
 }

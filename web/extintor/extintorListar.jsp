@@ -19,10 +19,13 @@
             </a>
         </div>
         <div class="card-body">
-
-            <c:if test="${not empty sessionScope.mensagem}">
-                <div class="alert alert-info text-center">${sessionScope.mensagem}</div>
-                <c:remove var="mensagem" scope="session"/>
+            <c:if test="${not empty sessionScope.mensagemSucesso}">
+                <div class="alert alert-success text-center">${sessionScope.mensagemSucesso}</div>
+                <c:remove var="mensagemSucesso" scope="session"/>
+            </c:if>
+            <c:if test="${not empty sessionScope.mensagemErro}">
+                <div class="alert alert-danger text-center">${sessionScope.mensagemErro}</div>
+                <c:remove var="mensagemErro" scope="session"/>
             </c:if>
 
             <form action="${pageContext.request.contextPath}/RemessaServlet" method="post">
@@ -37,11 +40,9 @@
                             <table class="table table-striped table-hover align-middle">
                                 <thead class="table-dark text-center">
                                     <tr>
-
                                         <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}">
                                             <th>Selecionar</th>
                                         </c:if>
-                                        
                                         <th>ID</th>
                                         <th>Nº Controle</th>
                                         <th>Equipamento</th>
@@ -57,7 +58,6 @@
                                 <tbody class="text-center">
                                     <c:forEach var="extintor" items="${listaExtintores}">
                                         <tr>
-                                            
                                             <c:if test="${sessionScope.usuarioLogado.perfil == 'Técnico'}">
                                                 <td>
                                                     <input class="form-check-input" type="checkbox" 
@@ -65,7 +65,6 @@
                                                            value="${extintor.idExtintor}">
                                                 </td>
                                             </c:if>
-                                            
                                             <td>${extintor.idExtintor}</td>
                                             <td>${extintor.numeroControle}</td>
                                             <td>${extintor.tipoEquipamento}</td>
@@ -76,7 +75,6 @@
                                             <td>${extintor.idSetor}</td>
                                             <td>${extintor.idStatus}</td>
                                             <td class="text-center">
-                                                
                                                 <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
                                                     <a href="${pageContext.request.contextPath}/ExtintorServlet?acao=editar&idExtintor=${extintor.idExtintor}" 
                                                        class="btn btn-sm btn-warning me-1">Editar</a>
@@ -84,7 +82,6 @@
                                                        class="btn btn-sm btn-danger"
                                                        onclick="return confirm('Deseja realmente excluir este extintor?');">Excluir</a>
                                                 </c:if>
-                                                
                                             </td>
                                         </tr>
                                     </c:forEach>

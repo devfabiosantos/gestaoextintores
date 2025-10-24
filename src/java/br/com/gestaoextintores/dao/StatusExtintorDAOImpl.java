@@ -66,4 +66,25 @@ public class StatusExtintorDAOImpl {
         }
         return status;
     }
+
+    public int getIdPorNome(String nomeStatus) {
+        int idStatus = -1;
+        String sql = "SELECT id_status FROM statusextintor WHERE nome = ?";
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, nomeStatus);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    idStatus = rs.getInt("id_status");
+                } else {
+                    LOGGER.log(Level.WARNING, "Status ''{0}'' não encontrado no banco de dados.", nomeStatus);
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao buscar ID do status por nome!", ex);
+        }
+        return idStatus;
+    }
 }

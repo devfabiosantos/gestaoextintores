@@ -44,6 +44,23 @@
                                 </div>
                             </div>
                         </c:if>
+                        
+                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
+                             <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h4>Gestão de Usuários</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Cadastre e gerencie os usuários do sistema.</p>
+                                        <div class="d-grid gap-2">
+                                            <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=listar" class="btn btn-outline-secondary">Listar Usuários</a>
+                                            <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=novo" class="btn btn-secondary">Novo Usuário</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
 
                         <div class="col-md-4 mb-4">
                             <div class="card h-100">
@@ -73,23 +90,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
-                             <div class="col-md-4 mb-4">
-                                <div class="card h-100">
-                                    <div class="card-header bg-secondary text-white">
-                                        <h4>Gestão de Usuários</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <p>Cadastre e gerencie os usuários do sistema.</p>
-                                        <div class="d-grid gap-2">
-                                            <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=listar" class="btn btn-outline-secondary">Listar Usuários</a>
-                                            <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=novo" class="btn btn-secondary">Novo Usuário</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </c:if>
 
                     </div>
                 </div>
