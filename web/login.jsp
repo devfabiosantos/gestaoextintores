@@ -20,7 +20,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #f8f9fa; /* bg-light */
+            background-color: #f8f9fa;
         }
         .login-card {
             width: 100%;

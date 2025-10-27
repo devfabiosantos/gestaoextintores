@@ -25,7 +25,6 @@
         </div>
         <div class="card-body">
             <form action="${pageContext.request.contextPath}/UsuarioServlet" method="get" class="mb-4">
-                 <%-- A ação é sempre 'listar' ao filtrar --%>
                  <input type="hidden" name="acao" value="listar" /> 
                  
                  <div class="row g-3 align-items-end">

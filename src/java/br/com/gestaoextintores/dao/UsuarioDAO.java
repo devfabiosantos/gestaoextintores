@@ -93,7 +93,6 @@ public class UsuarioDAO {
                      "LEFT JOIN filial f ON u.id_filial = f.id_filial ";
 
         if (idFilialFiltro != null) {
-             //sql += " WHERE u.id_filial = ? OR u.perfil = 'Admin'"; //Essa é a primeira lógica
              sql += " WHERE u.id_filial = ?";
         }
         

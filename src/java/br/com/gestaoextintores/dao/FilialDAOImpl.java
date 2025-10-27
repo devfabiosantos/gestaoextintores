@@ -1,7 +1,7 @@
 package br.com.gestaoextintores.dao;
 
 import br.com.gestaoextintores.model.Filial;
-import br.com.gestaoextintores.model.Usuario; // Precisamos do Usuário
+import br.com.gestaoextintores.model.Usuario;
 import br.com.gestaoextintores.util.ConnectionFactory;
 import java.sql.*;
 import java.util.ArrayList;

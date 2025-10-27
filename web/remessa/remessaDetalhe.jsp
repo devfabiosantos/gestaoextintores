@@ -41,10 +41,10 @@
                   <dt class="col-sm-3">Filial:</dt>
                   <dd class="col-sm-9">
                       <c:if test="${not empty remessa.filial}">${remessa.filial.nome}</c:if>
-                      <c:if test="${empty remessa.filial}">ID: ${remessa.idFilial}</c:if>
+                      <c:if test="${empty remessa.filial}">ID: ${remessa.idFilial}</c:if> <%-- Fallback --%>
                   </dd>
 
-                  <dt class="col-sm-3">Técnico Solicitante:</dt>
+                   <dt class="col-sm-3">Técnico Solicitante:</dt>
                   <dd class="col-sm-9">
                       <c:if test="${not empty remessa.tecnico}">${remessa.tecnico.nome}</c:if>
                       <c:if test="${empty remessa.tecnico}">ID: ${remessa.idUsuarioTecnico}</c:if>
@@ -72,17 +72,11 @@
                     <c:otherwise>
                         <table class="table table-sm table-bordered" style="width: auto;">
                             <thead class="table-light">
-                                <tr>
-                                    <th>Classe Extintora</th>
-                                    <th>Quantidade</th>
-                                </tr>
+                                <tr><th>Classe Extintora</th><th>Quantidade</th></tr>
                             </thead>
                             <tbody>
                                 <c:forEach var="itemResumo" items="${resumoItens}">
-                                    <tr>
-                                        <td>${itemResumo.classe_extintora}</td>
-                                        <td class="text-end">${itemResumo.quantidade}</td>
-                                    </tr>
+                                    <tr><td>${itemResumo.classe_extintora}</td><td class="text-end">${itemResumo.quantidade}</td></tr>
                                 </c:forEach>
                             </tbody>
                         </table>
@@ -101,8 +95,8 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>ID Item</th>
-                                    <th>Extintor (Nº Controle)</th> 
-                                    <th>Classe</th> 
+                                    <th>Extintor (Nº Controle)</th>
+                                    <th>Classe</th>
                                     <th>Observação do Técnico</th>
                                 </tr>
                             </thead>

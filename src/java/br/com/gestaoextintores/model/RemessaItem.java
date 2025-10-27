@@ -18,7 +18,6 @@ public class RemessaItem implements Serializable {
     private int idExtintor;
     private String observacaoTecnico;
     
-    // Objetos (para futuro JOIN)
     private Remessa remessa;
     private Extintor extintor;
 

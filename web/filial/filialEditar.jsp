@@ -11,7 +11,7 @@
 
     <div class="container mt-5">
         <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-warning text-dark"> <%-- Cor de Edição --%>
+            <div class="card-header bg-warning text-dark">
                 <h4 class="mb-0">Editar Filial</h4>
             </div>
             <div class="card-body">

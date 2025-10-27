@@ -34,7 +34,6 @@
                              <label for="idFilialFiltro" class="form-label fw-bold">Filtrar por Filial:</label>
                              <select name="idFilialFiltro" id="idFilialFiltro" class="form-select form-select-sm">
                                  <option value="" ${empty idFilialSelecionada ? 'selected' : ''}>Todas as Filiais</option>
-                                 <%-- O Servlet DEVE enviar 'listaTodasFiliais' para o Admin --%>
                                  <c:forEach var="filial" items="${listaTodasFiliais}">
                                      <option value="${filial.idFilial}" 
                                              <c:if test="${not empty idFilialSelecionada and idFilialSelecionada == filial.idFilial}">selected</c:if>>

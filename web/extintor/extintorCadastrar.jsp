@@ -82,7 +82,6 @@
                         <label for="idSetor" class="form-label">Setor*</label>
                         <select class="form-select" id="idSetor" name="idSetor" required>
                             <option value="">Selecione...</option>
-                            <%-- O Servlet (doGet, acao=novo) DEVE enviar a 'listaSetores' --%>
                             <c:forEach var="setor" items="${listaSetores}">
                                 <option value="${setor.idSetor}">${setor.nome}</option>
                             </c:forEach>
@@ -93,7 +92,6 @@
                         <label for="idStatus" class="form-label">Status Inicial*</label>
                         <select class="form-select" id="idStatus" name="idStatus" required>
                              <option value="">Selecione...</option>
-                             <%-- O Servlet (doGet, acao=novo) DEVE enviar a 'listaStatus' --%>
                              <c:forEach var="status" items="${listaStatus}">
                                 <option value="${status.idStatus}">${status.nome}</option>
                             </c:forEach>

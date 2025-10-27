@@ -193,11 +193,17 @@ public class ExtintorDAOImpl {
     public boolean atualizarDadosPosRecarga(List<Integer> idsExtintores, int idStatusOperacional, 
                                             java.util.Date novaDataRecarga, java.util.Date novaDataValidade, 
                                             Usuario usuarioLogado) {
-        if (idsExtintores == null || idsExtintores.isEmpty()) { return true; }
+        if (idsExtintores == null || idsExtintores.isEmpty()) {
+            return true; 
+        }
         StringBuilder sql = new StringBuilder("UPDATE extintor SET id_status = ?, data_recarga = ?, data_validade = ? WHERE id_extintor IN (");
-        for (int i = 0; i < idsExtintores.size(); i++) { sql.append("?").append(i < idsExtintores.size() - 1 ? "," : ""); }
-        sql.append(")");
-        if ("Técnico".equals(usuarioLogado.getPerfil())) { sql.append(" AND id_setor IN (SELECT id_setor FROM setor WHERE id_filial = ?)"); }
+        for (int i = 0; i < idsExtintores.size(); i++) { 
+            sql.append("?").append(i < idsExtintores.size() - 1 ? "," : ""); 
+        }
+            sql.append(")");
+        if ("Técnico".equals(usuarioLogado.getPerfil())) { 
+            sql.append(" AND id_setor IN (SELECT id_setor FROM setor WHERE id_filial = ?)"); 
+        }
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             conn.setAutoCommit(false);
@@ -205,8 +211,12 @@ public class ExtintorDAOImpl {
             stmt.setDate(2, new java.sql.Date(novaDataRecarga.getTime())); 
             stmt.setDate(3, new java.sql.Date(novaDataValidade.getTime()));
             int index = 4;
-            for (Integer idExtintor : idsExtintores) { stmt.setInt(index++, idExtintor); }
-            if ("Técnico".equals(usuarioLogado.getPerfil())) { stmt.setInt(index, usuarioLogado.getIdFilial()); }
+            for (Integer idExtintor : idsExtintores) { 
+                stmt.setInt(index++, idExtintor); 
+            }
+            if ("Técnico".equals(usuarioLogado.getPerfil())) { 
+                stmt.setInt(index, usuarioLogado.getIdFilial()); 
+            }
             int affectedRows = stmt.executeUpdate();
             conn.commit();
             if (affectedRows == idsExtintores.size()) {
