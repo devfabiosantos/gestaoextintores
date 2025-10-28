@@ -24,6 +24,7 @@ public class ExtintorDAOImpl {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setString(1, extintor.getTipoEquipamento());
             stmt.setString(2, extintor.getNumeroControle());
             stmt.setString(3, extintor.getClasseExtintora());
@@ -123,6 +124,7 @@ public class ExtintorDAOImpl {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setString(1, extintor.getTipoEquipamento());
             stmt.setString(2, extintor.getNumeroControle());
             stmt.setString(3, extintor.getClasseExtintora());
@@ -152,8 +154,11 @@ public class ExtintorDAOImpl {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setInt(1, idExtintor);
-            if ("Técnico".equals(usuarioLogado.getPerfil())) { stmt.setInt(2, usuarioLogado.getIdFilial()); }
+            if ("Técnico".equals(usuarioLogado.getPerfil())) { 
+                stmt.setInt(2, usuarioLogado.getIdFilial()); 
+            }
             stmt.executeUpdate();
             conn.commit();
             return true;
@@ -172,6 +177,7 @@ public class ExtintorDAOImpl {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setInt(1, idNovoStatus);
             int index = 2; 
             for (Integer idExtintor : idsExtintores) { stmt.setInt(index++, idExtintor); }
@@ -207,6 +213,7 @@ public class ExtintorDAOImpl {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setInt(1, idStatusOperacional);
             stmt.setDate(2, new java.sql.Date(novaDataRecarga.getTime())); 
             stmt.setDate(3, new java.sql.Date(novaDataValidade.getTime()));

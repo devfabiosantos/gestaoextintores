@@ -34,6 +34,7 @@ public class RemessaDAO {
         try {
             conn = ConnectionFactory.getConnection();
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setInt(1, remessa.getIdUsuarioTecnico());
@@ -166,6 +167,7 @@ public class RemessaDAO {
         try (Connection conn = ConnectionFactory.getConnection(); 
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false); 
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setString(1, NOVO_STATUS); 
             stmt.setInt(2, idUsuarioAdmin); 
             stmt.setInt(3, idRemessa);
@@ -190,7 +192,8 @@ public class RemessaDAO {
         String NOVO_STATUS = "Em Recarga";
         try (Connection conn = ConnectionFactory.getConnection(); 
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-            conn.setAutoCommit(false); 
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setString(1, NOVO_STATUS); 
             stmt.setInt(2, idRemessa);
             int affectedRows = stmt.executeUpdate(); 
@@ -214,7 +217,8 @@ public class RemessaDAO {
         String NOVO_STATUS = "Concluído";
         try (Connection conn = ConnectionFactory.getConnection(); 
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-            conn.setAutoCommit(false); 
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setString(1, NOVO_STATUS); 
             stmt.setInt(2, idRemessa);
             int affectedRows = stmt.executeUpdate(); 

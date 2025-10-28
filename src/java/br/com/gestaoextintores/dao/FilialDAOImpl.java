@@ -22,6 +22,7 @@ public class FilialDAOImpl {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setString(1, filial.getNome());
             stmt.setString(2, filial.getEndereco());
             stmt.execute();
@@ -75,6 +76,9 @@ public class FilialDAOImpl {
         
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+             conn.setAutoCommit(false);
+             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             
             stmt.setInt(1, idFilial);
 
@@ -133,6 +137,7 @@ public class FilialDAOImpl {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
             stmt.setString(1, filial.getNome());
             stmt.setString(2, filial.getEndereco());

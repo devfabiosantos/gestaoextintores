@@ -57,6 +57,7 @@ public class UsuarioDAO {
         try {
              conn = ConnectionFactory.getConnection();
              conn.setAutoCommit(false);
+             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, usuario.getNome());
@@ -165,6 +166,7 @@ public class UsuarioDAO {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getLogin());
             stmt.setString(3, usuario.getPerfil());
@@ -186,11 +188,18 @@ public class UsuarioDAO {
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setInt(1, idUsuario);
             int affectedRows = stmt.executeUpdate();
             conn.commit();
-             if (affectedRows > 0) { LOGGER.log(Level.INFO, "Usuário excluído com sucesso (ID: {0})", idUsuario); return true; } 
-             else { LOGGER.log(Level.WARNING, "Nenhum usuário encontrado para excluir (ID: {0})", idUsuario); return false; }
+             if (affectedRows > 0) { 
+                 LOGGER.log(Level.INFO, "Usuário excluído com sucesso (ID: {0})", idUsuario); 
+                 return true; 
+             } 
+             else { 
+                 LOGGER.log(Level.WARNING, "Nenhum usuário encontrado para excluir (ID: {0})", idUsuario); 
+                 return false; 
+             }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao excluir usuário!", ex);
             return false;

@@ -31,6 +31,8 @@ public class RemessaItemDAO {
         String sql = "INSERT INTO remessa_item (id_remessa, id_extintor, observacao_tecnico) VALUES (?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
              conn.commit();
              return true;
         } catch (Exception ex) {

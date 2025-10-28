@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 public class AuthenticationFilter implements Filter {
 
     private static final Logger LOGGER = Logger.getLogger(AuthenticationFilter.class.getName());
+    private static final String ENCODING = "UTF-8"; // Definir a codificação aqui
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -34,10 +35,16 @@ public class AuthenticationFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
 
+        // --- CORREÇÃO: DEFINIR ENCODING PRIMEIRO! ---
+        req.setCharacterEncoding(ENCODING);
+        res.setCharacterEncoding(ENCODING);
+        // ------------------------------------------
+
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
         String contextPath = request.getContextPath();
         String uri = request.getRequestURI();
+        // Agora podemos ler o parâmetro com segurança
         String acao = request.getParameter("acao");
 
         HttpSession sessao = request.getSession(false);
@@ -45,29 +52,16 @@ public class AuthenticationFilter implements Filter {
         boolean ehPaginaPublica = uri.endsWith("/LoginServlet") || uri.endsWith("/login.jsp");
         boolean ehRecursoEstatico = uri.contains("/css/") || uri.contains("/js/") || uri.contains("/images/");
 
+        // --- Lógica de Segurança (sem alterações) ---
         if (usuarioLogado != null) {
-
             boolean ehAcaoAdmin = false;
-
-            if (uri.contains("/UsuarioServlet")) {
-                ehAcaoAdmin = true;
-            }
-            else if (uri.contains("/FilialServlet")) {
-                ehAcaoAdmin = true;
-            }
-            else if (uri.contains("/ExtintorServlet")) {
-                if ("excluir".equals(acao)) {
-                    ehAcaoAdmin = true;
-                }
-            }
-            else if (uri.contains("/RemessaServlet")) {
-                if ("aprovarRecolhimento".equals(acao)) {
-                     ehAcaoAdmin = true;
-                }
-            }
+            if (uri.contains("/UsuarioServlet")) { ehAcaoAdmin = true; }
+            else if (uri.contains("/FilialServlet")) { ehAcaoAdmin = true; }
+            else if (uri.contains("/ExtintorServlet") && "excluir".equals(acao)) { ehAcaoAdmin = true; }
+            else if (uri.contains("/RemessaServlet") && "aprovarRecolhimento".equals(acao)) { ehAcaoAdmin = true; }
 
             if (ehAcaoAdmin && !"Admin".equals(usuarioLogado.getPerfil())) {
-                LOGGER.log(Level.WARNING, "ACESSO NEGADO (Permissão Insuficiente): Usuário {0} ({1}) tentou acessar ação Admin: {2}?acao={3}",
+                LOGGER.log(Level.WARNING, "ACESSO NEGADO (Permissão): Usuário {0} ({1}) tentou ação Admin: {2}?acao={3}",
                            new Object[]{usuarioLogado.getLogin(), usuarioLogado.getPerfil(), uri, acao});
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado. Permissão insuficiente para esta ação.");
                 return;
@@ -75,14 +69,14 @@ public class AuthenticationFilter implements Filter {
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("Pragma", "no-cache");
             response.setDateHeader("Expires", 0);
-            chain.doFilter(req, res);
+            chain.doFilter(req, res); // Prossegue
 
         } else if (ehPaginaPublica || ehRecursoEstatico) {
-            chain.doFilter(req, res);
+            chain.doFilter(req, res); // Prossegue
 
         } else {
             LOGGER.log(Level.WARNING, "ACESSO NEGADO (Não Autenticado) à URI: {0}", uri);
-            response.sendRedirect(contextPath + "/LoginServlet");
+            response.sendRedirect(contextPath + "/LoginServlet"); // Redireciona
         }
     }
 
