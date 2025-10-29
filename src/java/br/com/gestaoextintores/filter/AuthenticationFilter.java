@@ -24,7 +24,7 @@ import javax.servlet.http.HttpSession;
 public class AuthenticationFilter implements Filter {
 
     private static final Logger LOGGER = Logger.getLogger(AuthenticationFilter.class.getName());
-    private static final String ENCODING = "UTF-8"; // Definir a codificação aqui
+    private static final String ENCODING = "UTF-8";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -35,16 +35,13 @@ public class AuthenticationFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
 
-        // --- CORREÇÃO: DEFINIR ENCODING PRIMEIRO! ---
         req.setCharacterEncoding(ENCODING);
         res.setCharacterEncoding(ENCODING);
-        // ------------------------------------------
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
         String contextPath = request.getContextPath();
         String uri = request.getRequestURI();
-        // Agora podemos ler o parâmetro com segurança
         String acao = request.getParameter("acao");
 
         HttpSession sessao = request.getSession(false);
@@ -52,7 +49,6 @@ public class AuthenticationFilter implements Filter {
         boolean ehPaginaPublica = uri.endsWith("/LoginServlet") || uri.endsWith("/login.jsp");
         boolean ehRecursoEstatico = uri.contains("/css/") || uri.contains("/js/") || uri.contains("/images/");
 
-        // --- Lógica de Segurança (sem alterações) ---
         if (usuarioLogado != null) {
             boolean ehAcaoAdmin = false;
             if (uri.contains("/UsuarioServlet")) { ehAcaoAdmin = true; }
@@ -69,14 +65,14 @@ public class AuthenticationFilter implements Filter {
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             response.setHeader("Pragma", "no-cache");
             response.setDateHeader("Expires", 0);
-            chain.doFilter(req, res); // Prossegue
+            chain.doFilter(req, res);
 
         } else if (ehPaginaPublica || ehRecursoEstatico) {
-            chain.doFilter(req, res); // Prossegue
+            chain.doFilter(req, res);
 
         } else {
             LOGGER.log(Level.WARNING, "ACESSO NEGADO (Não Autenticado) à URI: {0}", uri);
-            response.sendRedirect(contextPath + "/LoginServlet"); // Redireciona
+            response.sendRedirect(contextPath + "/LoginServlet");
         }
     }
 

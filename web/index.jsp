@@ -44,6 +44,23 @@
                                 </div>
                             </div>
                         </c:if>
+
+                        <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-info text-white">
+                                        <h4>Gestão de Setores</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Cadastre e gerencie os setores de cada filial.</p>
+                                        <div class="d-grid gap-2">
+                                            <a href="${pageContext.request.contextPath}/SetorServlet?acao=listar" class="btn btn-outline-info">Listar Setores</a>
+                                            <a href="${pageContext.request.contextPath}/SetorServlet?acao=novo" class="btn btn-info">Novo Setor</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
                         
                         <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
                              <div class="col-md-4 mb-4">
