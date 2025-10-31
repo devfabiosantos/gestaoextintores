@@ -92,13 +92,16 @@ public class SetorServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        //request.setCharacterEncoding("UTF-8");
+        if (!isAdmin(request, response)) {
+            return; 
+        }
 
-        if (!isAdmin(request, response)) { return; }
-        
         HttpSession sessao = request.getSession(false);
         Usuario usuarioLogado = (Usuario) sessao.getAttribute("usuarioLogado");
         String acao = request.getParameter("acao");
+        String jspDestino = null;
+        boolean sucessoOperacao = false;
+        Setor setor = new Setor();
 
         try {
             SetorDAOImpl setorDAO = new SetorDAOImpl();
@@ -106,35 +109,60 @@ public class SetorServlet extends HttpServlet {
             String nome = request.getParameter("nome");
             int idFilial = 0;
             if ("salvar".equals(acao)) {
-                idFilial = Integer.parseInt(request.getParameter("idFilial"));
+                 String idFilialStr = request.getParameter("idFilial");
+                 if (idFilialStr == null || idFilialStr.isEmpty()) {
+                     throw new NumberFormatException("ID da Filial não foi selecionado.");
+                 }
+                idFilial = Integer.parseInt(idFilialStr);
+                setor.setIdFilial(idFilial);
             }
-            
-            Setor setor = new Setor();
             setor.setNome(nome);
 
             if ("salvar".equals(acao)) {
-                setor.setIdFilial(idFilial);
-                setorDAO.cadastrar(setor);
-
+                jspDestino = "/setor/setorCadastrar.jsp";
+                sucessoOperacao = setorDAO.cadastrar(setor);
+                if (sucessoOperacao) {
+                    sessao.setAttribute("mensagemSucesso", "Setor cadastrado com sucesso!");
+                } else {
+                    request.setAttribute("mensagemErro", "Falha ao cadastrar. O nome '" + setor.getNome() + "' já existe nesta filial.");
+                    request.setAttribute("setor", setor);
+                    FilialDAOImpl filialDAO = new FilialDAOImpl();
+                    request.setAttribute("listaFiliais", filialDAO.listar(usuarioLogado));
+                }
             } else if ("atualizar".equals(acao)) {
+                jspDestino = "/setor/setorEditar.jsp";
                 int idSetor = Integer.parseInt(request.getParameter("idSetor"));
                 setor.setIdSetor(idSetor);
-                setorDAO.alterar(setor, usuarioLogado);
+                sucessoOperacao = setorDAO.alterar(setor, usuarioLogado);
+                if (sucessoOperacao) {
+                    sessao.setAttribute("mensagemSucesso", "Setor alterado com sucesso!");
+                } else {
+                    request.setAttribute("mensagemErro", "Falha ao alterar. O nome '" + setor.getNome() + "' já existe nesta filial ou o setor não foi encontrado.");
+                     Setor setorOriginal = setorDAO.carregar(idSetor, usuarioLogado);
+                    request.setAttribute("setor", setorOriginal != null ? setorOriginal : setor);
+                }
+            } else { response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return; 
             }
 
-            response.sendRedirect(request.getContextPath() + "/SetorServlet?acao=listar");
-
+            if (sucessoOperacao) {
+                response.sendRedirect(request.getContextPath() + "/SetorServlet?acao=listar");
+            } else {
+                RequestDispatcher rd = request.getRequestDispatcher(jspDestino);
+                rd.forward(request, response);
+            }
         } catch (NumberFormatException ex) {
-             LOGGER.log(Level.WARNING, "Erro ao converter ID de Filial/Setor", ex);
+             LOGGER.log(Level.WARNING, "Erro converter ID", ex);
              FilialDAOImpl filialDAO = new FilialDAOImpl();
              List<Filial> listaFiliais = filialDAO.listar(usuarioLogado);
              request.setAttribute("listaFiliais", listaFiliais);
              request.setAttribute("mensagemErro", "ID inválido fornecido.");
-             String jspDestino = "/setor/" + ("salvar".equals(acao) ? "setorCadastrar.jsp" : "setorEditar.jsp");
-             RequestDispatcher rd = request.getRequestDispatcher(jspDestino);
+             jspDestino = "/setor/" + ("salvar".equals(acao) ? "setorCadastrar.jsp" : "setorEditar.jsp");
+             request.setAttribute("setor", setor);
+             RequestDispatcher rd = request.getRequestDispatcher(jspDestino); 
              rd.forward(request, response);
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro no SetorServlet (POST): ", ex);
+            LOGGER.log(Level.SEVERE, "Erro POST Setor", ex);
             throw new ServletException("Erro POST Setor: " + ex.getMessage(), ex);
         }
     }

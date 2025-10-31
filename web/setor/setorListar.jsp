@@ -50,7 +50,7 @@
                                         <td>${setor.nome}</td>
                                         <td>
                                             <c:if test="${not empty setor.filial}">${setor.filial.nome}</c:if>
-                                            <c:if test="${empty setor.filial}">ID: ${setor.idFilial}</c:if>
+                                            <c:if test="${empty setor.filial}">ID: ${setor.idFilial}</c:if> 
                                         </td>
                                         <td class="text-center">
                                             <a href="${pageContext.request.contextPath}/SetorServlet?acao=editar&idSetor=${setor.idSetor}"
