@@ -24,35 +24,35 @@ public class FilialServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession sessao = request.getSession(false); 
+        HttpSession sessao = request.getSession(false);
         Usuario usuarioLogado = (sessao != null) ? (Usuario) sessao.getAttribute("usuarioLogado") : null;
 
         if (usuarioLogado == null) {
             response.sendRedirect(request.getContextPath() + "/LoginServlet");
             return;
         }
-        
+
         String acao = request.getParameter("acao");
 
         try {
             FilialDAOImpl filialDAO = new FilialDAOImpl();
 
-            if (acao == null || acao.equals("listar")) {
+            if (acao == null || "listar".equals(acao)) {
                 List<Filial> listaFiliais = filialDAO.listar(usuarioLogado);
                 request.setAttribute("listaFiliais", listaFiliais);
                 RequestDispatcher rd = request.getRequestDispatcher("/filial/filialListar.jsp");
                 rd.forward(request, response);
 
-            } else if (acao.equals("novo")) {
-                 if (!"Admin".equals(usuarioLogado.getPerfil())) {
+            } else if ("novo".equals(acao)) {
+                if (!"Admin".equals(usuarioLogado.getPerfil())) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado");
                     return;
                 }
                 RequestDispatcher rd = request.getRequestDispatcher("/filial/filialCadastrar.jsp");
                 rd.forward(request, response);
 
-            } else if (acao.equals("editar")) {
-                 if (!"Admin".equals(usuarioLogado.getPerfil())) {
+            } else if ("editar".equals(acao)) {
+                if (!"Admin".equals(usuarioLogado.getPerfil())) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado");
                     return;
                 }
@@ -60,28 +60,36 @@ public class FilialServlet extends HttpServlet {
                 Filial filial = filialDAO.carregar(idFilial, usuarioLogado);
 
                 if (filial == null) {
-                   LOGGER.log(Level.WARNING, "Tentativa de editar filial inexistente ou não permitida (ID: {0}) pelo usuário {1}", 
+                    LOGGER.log(Level.WARNING, "Tentativa de editar filial inexistente ou não permitida (ID: {0}) pelo usuário {1}",
                             new Object[]{idFilial, usuarioLogado.getLogin()});
-                   response.sendError(HttpServletResponse.SC_NOT_FOUND, "Filial não encontrada ou acesso negado.");
-                   return;
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Filial não encontrada ou acesso negado.");
+                    return;
                 }
-                
+
                 request.setAttribute("filial", filial);
                 RequestDispatcher rd = request.getRequestDispatcher("/filial/filialEditar.jsp");
                 rd.forward(request, response);
 
-            } else if (acao.equals("excluir")) {
-                 if (!"Admin".equals(usuarioLogado.getPerfil())) {
+            } else if ("excluir".equals(acao)) {
+                if (!"Admin".equals(usuarioLogado.getPerfil())) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado");
                     return;
                 }
                 int idFilial = Integer.parseInt(request.getParameter("idFilial"));
-                filialDAO.excluir(idFilial, usuarioLogado);
+                boolean excluida = filialDAO.excluir(idFilial, usuarioLogado);
+                HttpSession sessaoAtual = request.getSession();
+                if (excluida) {
+                    sessaoAtual.setAttribute("mensagemSucesso", "Filial excluída com sucesso.");
+                } else {
+                    sessaoAtual.setAttribute("mensagemErro", "Falha ao excluir filial. Verifique se o registro ainda existe.");
+                }
                 response.sendRedirect(request.getContextPath() + "/FilialServlet?acao=listar");
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação GET inválida.");
             }
 
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro no FilialServlet (GET): ", ex);
+            LOGGER.log(Level.SEVERE, "Erro no FilialServlet (GET)", ex);
             throw new ServletException("Erro ao processar a requisição GET: " + ex.getMessage(), ex);
         }
     }
@@ -90,14 +98,12 @@ public class FilialServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        //request.setCharacterEncoding("UTF-8");
-
         HttpSession sessao = request.getSession(false);
         Usuario usuarioLogado = (sessao != null) ? (Usuario) sessao.getAttribute("usuarioLogado") : null;
 
         if (usuarioLogado == null || !"Admin".equals(usuarioLogado.getPerfil())) {
-             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado");
-             return;
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado");
+            return;
         }
 
         String acao = request.getParameter("acao");
@@ -112,19 +118,41 @@ public class FilialServlet extends HttpServlet {
             filial.setNome(nome);
             filial.setEndereco(endereco);
 
+            HttpSession sessaoAtual = request.getSession();
             if ("salvar".equals(acao)) {
-                filialDAO.cadastrar(filial);
+                boolean cadastrada = filialDAO.cadastrar(filial);
+                if (cadastrada) {
+                    sessaoAtual.setAttribute("mensagemSucesso", "Filial cadastrada com sucesso.");
+                } else {
+                    request.setAttribute("mensagemErro", "Falha ao cadastrar filial.");
+                    request.setAttribute("filial", filial);
+                    RequestDispatcher rd = request.getRequestDispatcher("/filial/filialCadastrar.jsp");
+                    rd.forward(request, response);
+                    return;
+                }
 
             } else if ("atualizar".equals(acao)) {
                 int idFilial = Integer.parseInt(request.getParameter("idFilial"));
                 filial.setIdFilial(idFilial);
-                filialDAO.alterar(filial, usuarioLogado);
+                boolean alterada = filialDAO.alterar(filial, usuarioLogado);
+                if (alterada) {
+                    sessaoAtual.setAttribute("mensagemSucesso", "Filial alterada com sucesso.");
+                } else {
+                    request.setAttribute("mensagemErro", "Falha ao alterar filial. Verifique se o registro ainda existe.");
+                    request.setAttribute("filial", filial);
+                    RequestDispatcher rd = request.getRequestDispatcher("/filial/filialEditar.jsp");
+                    rd.forward(request, response);
+                    return;
+                }
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação POST inválida.");
+                return;
             }
 
             response.sendRedirect(request.getContextPath() + "/FilialServlet?acao=listar");
 
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro no FilialServlet (POST): ", ex);
+            LOGGER.log(Level.SEVERE, "Erro no FilialServlet (POST)", ex);
             throw new ServletException("Erro ao processar a requisição POST: " + ex.getMessage(), ex);
         }
     }
