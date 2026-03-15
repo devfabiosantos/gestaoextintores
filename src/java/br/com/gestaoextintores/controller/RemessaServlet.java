@@ -5,10 +5,13 @@ import br.com.gestaoextintores.dao.FilialDAOImpl;
 import br.com.gestaoextintores.dao.RemessaDAO;
 import br.com.gestaoextintores.dao.RemessaItemDAO;
 import br.com.gestaoextintores.dao.StatusExtintorDAOImpl;
+import br.com.gestaoextintores.model.Extintor;
 import br.com.gestaoextintores.model.Filial;
 import br.com.gestaoextintores.model.Remessa;
 import br.com.gestaoextintores.model.RemessaItem;
 import br.com.gestaoextintores.model.Usuario;
+import br.com.gestaoextintores.util.EmailService;
+import br.com.gestaoextintores.util.PdfRemessaGenerator;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -152,6 +155,29 @@ public class RemessaServlet extends HttpServlet {
                 RequestDispatcher rd = request.getRequestDispatcher("/remessa/remessaRecebimento.jsp");
                 rd.forward(request, response);
 
+            } else if ("baixarPdf".equals(acao)) {
+                Integer idRemessa = getIntParameter(request, "idRemessa");
+                if (idRemessa == null) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID da remessa inválido.");
+                    return;
+                }
+
+                Remessa remessa = remessaDAO.carregarPdf(idRemessa, usuarioLogado);
+                if (remessa == null) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "PDF da remessa não encontrado ou acesso negado.");
+                    return;
+                }
+                if (remessa.getPdfConteudo() == null || remessa.getPdfConteudo().length == 0) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "A remessa ainda não possui PDF gerado.");
+                    return;
+                }
+
+                response.setContentType(remessa.getPdfMimeType() != null ? remessa.getPdfMimeType() : "application/pdf");
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + remessa.getPdfNomeArquivo() + "\"");
+                response.setContentLength(remessa.getPdfConteudo().length);
+                response.getOutputStream().write(remessa.getPdfConteudo());
+                response.getOutputStream().flush();
+
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação GET inválida: " + acao);
             }
@@ -232,7 +258,34 @@ public class RemessaServlet extends HttpServlet {
                     throw new ServletException("Falha ao atualizar status dos extintores para remessa.");
                 }
 
-                sessao.setAttribute("mensagemSucesso", "Remessa criada com sucesso.");
+                Remessa remessaPdf = remessaDAO.carregar(idNovaRemessa, usuarioLogado);
+                if (remessaPdf == null) {
+                    throw new ServletException("Falha ao carregar remessa recém-criada para geração do PDF.");
+                }
+                List<Extintor> extintoresSelecionados = extintorDAO.carregarPorIds(idsExtintores, usuarioLogado);
+                LOGGER.log(Level.INFO, "Gerando PDF da remessa ID {0} com {1} extintores.",
+                        new Object[]{idNovaRemessa, extintoresSelecionados.size()});
+                byte[] pdfConteudo = PdfRemessaGenerator.gerarPdfRemessa(remessaPdf, extintoresSelecionados);
+                String nomeArquivo = "remessa_" + idNovaRemessa + ".pdf";
+                if (!remessaDAO.salvarPdf(idNovaRemessa, nomeArquivo, "application/pdf", pdfConteudo)) {
+                    throw new ServletException("Falha ao salvar PDF da remessa.");
+                }
+
+                String mensagemSucesso = "Remessa criada com sucesso. PDF gerado.";
+                try {
+                    EmailService emailService = new EmailService();
+                    EmailService.ResultadoEnvio resultadoEnvio = emailService.enviarNovaRemessa(remessaPdf, usuarioLogado, pdfConteudo, nomeArquivo);
+                    if (resultadoEnvio.isEnviado()) {
+                        mensagemSucesso += " E-mail enviado com sucesso.";
+                    } else if (resultadoEnvio.getMensagem() != null) {
+                        mensagemSucesso += " " + resultadoEnvio.getMensagem();
+                    }
+                } catch (Exception emailEx) {
+                    LOGGER.log(Level.WARNING, "Falha ao enviar e-mail da remessa ID " + idNovaRemessa, emailEx);
+                    mensagemSucesso += " Não foi possível enviar o e-mail nesta operação.";
+                }
+
+                sessao.setAttribute("mensagemSucesso", mensagemSucesso);
                 response.sendRedirect(request.getContextPath() + "/ExtintorServlet?acao=listar");
                 return;
 

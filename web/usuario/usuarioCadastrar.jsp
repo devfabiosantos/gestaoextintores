@@ -32,13 +32,21 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="nome" class="form-label">Nome Completo*</label>
-                        <input type="text" class="form-control" id="nome" name="nome" required>
+                        <input type="text" class="form-control" id="nome" name="nome" value="${usuario.nome}" required>
                         <div class="invalid-feedback">Obrigatório.</div>
                     </div>
                     <div class="col-md-6">
                         <label for="login" class="form-label">Login (Nome de Usuário)*</label>
-                        <input type="text" class="form-control" id="login" name="login" required>
+                        <input type="text" class="form-control" id="login" name="login" value="${usuario.login}" required>
                         <div class="invalid-feedback">Obrigatório.</div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="email" class="form-label">E-mail*</label>
+                        <input type="email" class="form-control" id="email" name="email" value="${usuario.email}" required>
+                        <div class="invalid-feedback">Informe um e-mail válido.</div>
                     </div>
                 </div>
 
@@ -52,8 +60,8 @@
                         <label for="perfil" class="form-label">Perfil*</label>
                         <select class="form-select" id="perfil" name="perfil" required onchange="toggleFilial()">
                              <option value="">Selecione...</option>
-                             <option value="Admin">Admin</option>
-                             <option value="Técnico">Técnico</option>
+                             <option value="Admin" ${usuario.perfil == 'Admin' ? 'selected' : ''}>Admin</option>
+                             <option value="Técnico" ${usuario.perfil == 'Técnico' ? 'selected' : ''}>Técnico</option>
                          </select>
                          <div class="invalid-feedback">Obrigatório.</div>
                     </div>
@@ -65,7 +73,7 @@
                         <select class="form-select" id="idFilial" name="idFilial">
                             <option value="">Selecione...</option>
                             <c:forEach var="filial" items="${listaFiliais}">
-                                <option value="${filial.idFilial}">${filial.nome}</option>
+                                <option value="${filial.idFilial}" ${usuario.idFilial == filial.idFilial ? 'selected' : ''}>${filial.nome}</option>
                             </c:forEach>
                         </select>
                          <div class="invalid-feedback">Obrigatório para Técnicos.</div>

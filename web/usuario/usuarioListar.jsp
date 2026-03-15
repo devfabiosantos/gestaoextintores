@@ -67,6 +67,7 @@
                                     <th>ID</th>
                                     <th>Nome</th>
                                     <th>Login</th>
+                                    <th>E-mail</th>
                                     <th>Perfil</th>
                                     <th>Filial</th>
                                     <th class="text-center">Ações</th>
@@ -78,6 +79,10 @@
                                         <td>${usuario.idUsuario}</td>
                                         <td>${usuario.nome}</td>
                                         <td>${usuario.login}</td>
+                                        <td>
+                                            <c:if test="${not empty usuario.email}">${usuario.email}</c:if>
+                                            <c:if test="${empty usuario.email}">-</c:if>
+                                        </td>
                                         <td>${usuario.perfil}</td>
                                         <td>
                                             <c:if test="${not empty usuario.filial}">${usuario.filial.nome}</c:if>

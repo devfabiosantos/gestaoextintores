@@ -19,6 +19,7 @@ public class Usuario implements Serializable {
     private int idUsuario;
     private String nome;
     private String login;
+    private String email;
     private String senha;
     private String perfil;
     private Integer idFilial;
@@ -53,6 +54,14 @@ public class Usuario implements Serializable {
     }
     public String getSenha() {
         return senha; 
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
     
     public void setSenha(String senha) {

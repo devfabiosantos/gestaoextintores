@@ -6,6 +6,7 @@ import br.com.gestaoextintores.model.Filial;
 import br.com.gestaoextintores.model.Usuario;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
@@ -21,6 +22,7 @@ public class UsuarioServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(UsuarioServlet.class.getName());
     private static final String PERFIL_TECNICO = "Técnico";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private boolean isAdmin(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession sessao = request.getSession(false);
@@ -143,8 +145,28 @@ public class UsuarioServlet extends HttpServlet {
 
             String nome = request.getParameter("nome");
             String login = request.getParameter("login");
+            String email = request.getParameter("email");
             String perfil = request.getParameter("perfil");
             String idFilialStr = request.getParameter("idFilial");
+
+            if (email == null || email.trim().isEmpty()) {
+                request.setAttribute("mensagemErro", "O e-mail é obrigatório.");
+                carregarFiliais(request, usuarioLogado);
+                request.setAttribute("usuario", montarUsuarioParcial(request, null));
+                RequestDispatcher rd = request.getRequestDispatcher("/usuario/" + ("salvar".equals(acao) ? "usuarioCadastrar.jsp" : "usuarioEditar.jsp"));
+                rd.forward(request, response);
+                return;
+            }
+
+            email = email.trim();
+            if (!EMAIL_PATTERN.matcher(email).matches()) {
+                request.setAttribute("mensagemErro", "Informe um e-mail válido.");
+                carregarFiliais(request, usuarioLogado);
+                request.setAttribute("usuario", montarUsuarioParcial(request, null));
+                RequestDispatcher rd = request.getRequestDispatcher("/usuario/" + ("salvar".equals(acao) ? "usuarioCadastrar.jsp" : "usuarioEditar.jsp"));
+                rd.forward(request, response);
+                return;
+            }
 
             Integer idFilial = null;
             if (PERFIL_TECNICO.equals(perfil)) {
@@ -171,6 +193,7 @@ public class UsuarioServlet extends HttpServlet {
             Usuario usuario = new Usuario();
             usuario.setNome(nome);
             usuario.setLogin(login);
+            usuario.setEmail(email);
             usuario.setPerfil(perfil);
             usuario.setIdFilial(idFilial);
 
@@ -229,6 +252,7 @@ public class UsuarioServlet extends HttpServlet {
         Usuario usuario = new Usuario();
         usuario.setNome(request.getParameter("nome"));
         usuario.setLogin(request.getParameter("login"));
+        usuario.setEmail(request.getParameter("email"));
         usuario.setPerfil(request.getParameter("perfil"));
         String idFilialStr = request.getParameter("idFilial");
         if (idFilialStr != null && !idFilialStr.isEmpty()) {

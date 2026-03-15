@@ -22,7 +22,7 @@ public class UsuarioDAO {
     }
 
     public Usuario validarLogin(String login, String senha) {
-        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.perfil, u.id_filial, "
+        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.email, u.perfil, u.id_filial, "
                 + "       f.id_filial AS f_id_filial, f.nome AS nome_filial, f.endereco AS endereco_filial "
                 + "FROM usuario u "
                 + "LEFT JOIN filial f ON u.id_filial = f.id_filial "
@@ -50,7 +50,7 @@ public class UsuarioDAO {
     }
 
     public int cadastrar(Usuario usuario) {
-        String sql = "INSERT INTO usuario (nome, login, senha, perfil, id_filial) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO usuario (nome, login, email, senha, perfil, id_filial) VALUES (?, ?, ?, ?, ?, ?)";
         int idGerado = -1;
         Connection conn = null;
 
@@ -62,12 +62,13 @@ public class UsuarioDAO {
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, usuario.getNome());
                 stmt.setString(2, usuario.getLogin());
-                stmt.setString(3, usuario.getSenha());
-                stmt.setString(4, usuario.getPerfil());
+                stmt.setString(3, usuario.getEmail());
+                stmt.setString(4, usuario.getSenha());
+                stmt.setString(5, usuario.getPerfil());
                 if (usuario.getIdFilial() == null) {
-                    stmt.setNull(5, Types.INTEGER);
+                    stmt.setNull(6, Types.INTEGER);
                 } else {
-                    stmt.setInt(5, usuario.getIdFilial());
+                    stmt.setInt(6, usuario.getIdFilial());
                 }
                 stmt.executeUpdate();
 
@@ -106,7 +107,7 @@ public class UsuarioDAO {
 
     public List<Usuario> listar(Integer idFilialFiltro) {
         List<Usuario> resultado = new ArrayList<>();
-        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.perfil, u.id_filial, "
+        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.email, u.perfil, u.id_filial, "
                 + "       f.id_filial AS f_id_filial, f.nome AS nome_filial, f.endereco AS endereco_filial "
                 + "FROM usuario u "
                 + "LEFT JOIN filial f ON u.id_filial = f.id_filial ";
@@ -137,7 +138,7 @@ public class UsuarioDAO {
 
     public List<Usuario> listar() {
         List<Usuario> resultado = new ArrayList<>();
-        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.perfil, u.id_filial, "
+        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.email, u.perfil, u.id_filial, "
                 + "       f.id_filial AS f_id_filial, f.nome AS nome_filial, f.endereco AS endereco_filial "
                 + "FROM usuario u "
                 + "LEFT JOIN filial f ON u.id_filial = f.id_filial "
@@ -158,7 +159,7 @@ public class UsuarioDAO {
 
     public Usuario carregar(int idUsuario) {
         Usuario usuario = null;
-        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.perfil, u.id_filial, "
+        String sql = "SELECT u.id_usuario, u.nome AS nome_usuario, u.login, u.email, u.perfil, u.id_filial, "
                 + "       f.id_filial AS f_id_filial, f.nome AS nome_filial, f.endereco AS endereco_filial "
                 + "FROM usuario u "
                 + "LEFT JOIN filial f ON u.id_filial = f.id_filial "
@@ -180,20 +181,21 @@ public class UsuarioDAO {
     }
 
     public boolean alterar(Usuario usuario) {
-        String sql = "UPDATE usuario SET nome = ?, login = ?, perfil = ?, id_filial = ? WHERE id_usuario = ?";
+        String sql = "UPDATE usuario SET nome = ?, login = ?, email = ?, perfil = ?, id_filial = ? WHERE id_usuario = ?";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             stmt.setString(1, usuario.getNome());
             stmt.setString(2, usuario.getLogin());
-            stmt.setString(3, usuario.getPerfil());
+            stmt.setString(3, usuario.getEmail());
+            stmt.setString(4, usuario.getPerfil());
             if (usuario.getIdFilial() == null) {
-                stmt.setNull(4, Types.INTEGER);
+                stmt.setNull(5, Types.INTEGER);
             } else {
-                stmt.setInt(4, usuario.getIdFilial());
+                stmt.setInt(5, usuario.getIdFilial());
             }
-            stmt.setInt(5, usuario.getIdUsuario());
+            stmt.setInt(6, usuario.getIdUsuario());
             int affectedRows = stmt.executeUpdate();
             conn.commit();
             if (affectedRows > 0) {
@@ -236,6 +238,7 @@ public class UsuarioDAO {
         usuario.setIdUsuario(rs.getInt("id_usuario"));
         usuario.setNome(rs.getString("nome_usuario"));
         usuario.setLogin(rs.getString("login"));
+        usuario.setEmail(rs.getString("email"));
         usuario.setPerfil(rs.getString("perfil"));
 
         int idFilialUsuario = rs.getInt("id_filial");

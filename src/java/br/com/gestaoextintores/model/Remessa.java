@@ -23,6 +23,10 @@ public class Remessa implements Serializable {
     private String statusRemessa;
     private Integer idUsuarioAdmin;
     private Date dataAprovacao;
+    private String pdfNomeArquivo;
+    private String pdfMimeType;
+    private byte[] pdfConteudo;
+    private Date pdfGeradoEm;
     
     private Usuario tecnico;
     private Usuario admin;
@@ -86,6 +90,38 @@ public class Remessa implements Serializable {
 
     public void setDataAprovacao(Date dataAprovacao) {
         this.dataAprovacao = dataAprovacao;
+    }
+
+    public String getPdfNomeArquivo() {
+        return pdfNomeArquivo;
+    }
+
+    public void setPdfNomeArquivo(String pdfNomeArquivo) {
+        this.pdfNomeArquivo = pdfNomeArquivo;
+    }
+
+    public String getPdfMimeType() {
+        return pdfMimeType;
+    }
+
+    public void setPdfMimeType(String pdfMimeType) {
+        this.pdfMimeType = pdfMimeType;
+    }
+
+    public byte[] getPdfConteudo() {
+        return pdfConteudo;
+    }
+
+    public void setPdfConteudo(byte[] pdfConteudo) {
+        this.pdfConteudo = pdfConteudo;
+    }
+
+    public Date getPdfGeradoEm() {
+        return pdfGeradoEm;
+    }
+
+    public void setPdfGeradoEm(Date pdfGeradoEm) {
+        this.pdfGeradoEm = pdfGeradoEm;
     }
 
     public Usuario getTecnico() {

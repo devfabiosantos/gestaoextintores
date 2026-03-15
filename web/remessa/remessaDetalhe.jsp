@@ -60,6 +60,20 @@
                       <dt class="col-sm-3">Data Aprovação:</dt>
                       <dd class="col-sm-9"><fmt:formatDate value="${remessa.dataAprovacao}" pattern="dd/MM/yyyy HH:mm:ss"/></dd>
                   </c:if>
+
+                  <dt class="col-sm-3">PDF da Remessa:</dt>
+                  <dd class="col-sm-9">
+                      <c:if test="${not empty remessa.pdfNomeArquivo}">
+                          <a href="${pageContext.request.contextPath}/RemessaServlet?acao=baixarPdf&idRemessa=${remessa.idRemessa}"
+                             class="btn btn-sm btn-outline-primary">
+                              Baixar PDF
+                          </a>
+                          <span class="ms-2 text-muted">${remessa.pdfNomeArquivo}</span>
+                      </c:if>
+                      <c:if test="${empty remessa.pdfNomeArquivo}">
+                          <span class="text-muted">PDF ainda não gerado.</span>
+                      </c:if>
+                  </dd>
                 </dl>
 
                 <hr/>

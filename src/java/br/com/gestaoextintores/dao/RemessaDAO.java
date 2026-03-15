@@ -23,6 +23,9 @@ import java.util.logging.Logger;
 public class RemessaDAO {
 
     private static final Logger LOGGER = Logger.getLogger(RemessaDAO.class.getName());
+    private static final String REMESSA_COLUMNS = "r.id_remessa, r.id_usuario_tecnico, r.id_filial, "
+            + "r.data_criacao, r.status_remessa, r.id_usuario_admin, r.data_aprovacao, "
+            + "r.pdf_nome_arquivo, r.pdf_mime_type, r.pdf_gerado_em";
 
     public RemessaDAO() {}
 
@@ -77,16 +80,16 @@ public class RemessaDAO {
 
     public List<Remessa> listar(Usuario usuarioLogado, Integer idFilialFiltro) {
         List<Remessa> resultado = new ArrayList<>();
-        String sql = "SELECT * FROM remessa";
+        String sql = "SELECT " + REMESSA_COLUMNS + " FROM remessa r";
         Integer idFilialParaFiltrar = null;
         if ("Técnico".equals(usuarioLogado.getPerfil())) {
-            sql += " WHERE id_filial = ?";
+            sql += " WHERE r.id_filial = ?";
             idFilialParaFiltrar = usuarioLogado.getIdFilial();
         } else if ("Admin".equals(usuarioLogado.getPerfil()) && idFilialFiltro != null) {
-            sql += " WHERE id_filial = ?";
+            sql += " WHERE r.id_filial = ?";
             idFilialParaFiltrar = idFilialFiltro;
         }
-        sql += " ORDER BY data_criacao DESC";
+        sql += " ORDER BY r.data_criacao DESC";
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             if (idFilialParaFiltrar != null) {
@@ -105,7 +108,7 @@ public class RemessaDAO {
 
     public Remessa carregar(int idRemessa, Usuario usuarioLogado) {
         Remessa remessa = null;
-        String sql = "SELECT r.*, t.nome AS nome_tecnico, a.nome AS nome_admin, f.nome AS nome_filial "
+        String sql = "SELECT " + REMESSA_COLUMNS + ", t.nome AS nome_tecnico, a.nome AS nome_admin, f.nome AS nome_filial "
                 + "FROM remessa r "
                 + "LEFT JOIN usuario t ON r.id_usuario_tecnico = t.id_usuario "
                 + "LEFT JOIN filial f ON r.id_filial = f.id_filial "
@@ -155,6 +158,73 @@ public class RemessaDAO {
                 } catch (Exception e) {
                 }
             }
+        }
+        return remessa;
+    }
+
+    public boolean salvarPdf(int idRemessa, String nomeArquivo, String mimeType, byte[] conteudo) {
+        String sql = "UPDATE remessa "
+                + "SET pdf_nome_arquivo = ?, pdf_mime_type = ?, pdf_conteudo = ?, pdf_gerado_em = CURRENT_TIMESTAMP "
+                + "WHERE id_remessa = ?";
+        Connection conn = null;
+        try {
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, nomeArquivo);
+                stmt.setString(2, mimeType);
+                stmt.setBytes(3, conteudo);
+                stmt.setInt(4, idRemessa);
+                int affectedRows = stmt.executeUpdate();
+                conn.commit();
+                LOGGER.log(Level.INFO, "PDF salvo para remessa ID {0}. Linhas afetadas: {1}. Bytes: {2}",
+                        new Object[]{idRemessa, affectedRows, conteudo != null ? conteudo.length : 0});
+                return affectedRows > 0;
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao salvar PDF da remessa (ID: " + idRemessa + ")!", ex);
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rbEx) {
+                }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    ConnectionFactory.closeConnection(conn);
+                } catch (Exception e) {
+                }
+            }
+        }
+    }
+
+    public Remessa carregarPdf(int idRemessa, Usuario usuarioLogado) {
+        Remessa remessa = null;
+        String sql = "SELECT " + REMESSA_COLUMNS + ", r.pdf_conteudo "
+                + "FROM remessa r "
+                + "WHERE r.id_remessa = ?";
+        boolean ehTecnico = "Técnico".equals(usuarioLogado.getPerfil());
+        if (ehTecnico) {
+            sql += " AND r.id_filial = ?";
+        }
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idRemessa);
+            if (ehTecnico) {
+                stmt.setInt(2, usuarioLogado.getIdFilial());
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    remessa = popularRemessa(rs);
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao carregar PDF da remessa (ID: " + idRemessa + ")!", ex);
         }
         return remessa;
     }
@@ -273,6 +343,18 @@ public class RemessaDAO {
             remessa.setStatusRemessa(rs.getString("status_remessa"));
             remessa.setIdUsuarioAdmin(rs.getObject("id_usuario_admin") != null ? rs.getInt("id_usuario_admin") : null);
             remessa.setDataAprovacao(rs.getTimestamp("data_aprovacao"));
+            if (hasColumn(rs, "pdf_nome_arquivo")) {
+                remessa.setPdfNomeArquivo(rs.getString("pdf_nome_arquivo"));
+            }
+            if (hasColumn(rs, "pdf_mime_type")) {
+                remessa.setPdfMimeType(rs.getString("pdf_mime_type"));
+            }
+            if (hasColumn(rs, "pdf_gerado_em")) {
+                remessa.setPdfGeradoEm(rs.getTimestamp("pdf_gerado_em"));
+            }
+            if (hasColumn(rs, "pdf_conteudo")) {
+                remessa.setPdfConteudo(rs.getBytes("pdf_conteudo"));
+            }
 
             if (hasColumn(rs, "nome_filial")) {
                 Filial filial = new Filial();

@@ -43,6 +43,14 @@
                     </div>
                 </div>
 
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="email" class="form-label">E-mail*</label>
+                        <input type="email" class="form-control" id="email" name="email" value="${usuario.email}" required>
+                        <div class="invalid-feedback">Informe um e-mail válido.</div>
+                    </div>
+                </div>
+
                  <div class="row mb-3">
                      <div class="col-md-6">
                         <label for="perfil" class="form-label">Perfil*</label>

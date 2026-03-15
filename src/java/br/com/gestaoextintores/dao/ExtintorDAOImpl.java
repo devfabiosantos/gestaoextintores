@@ -20,6 +20,51 @@ public class ExtintorDAOImpl {
 
     public ExtintorDAOImpl() {}
 
+    public List<Extintor> carregarPorIds(List<Integer> idsExtintores, Usuario usuarioLogado) {
+        List<Extintor> resultado = new ArrayList<>();
+        if (idsExtintores == null || idsExtintores.isEmpty()) {
+            return resultado;
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT e.*, s.nome AS nome_setor, s.id_filial, st.nome AS nome_status "
+                + "FROM extintor e "
+                + "JOIN setor s ON e.id_setor = s.id_setor "
+                + "LEFT JOIN statusextintor st ON e.id_status = st.id_status "
+                + "WHERE e.id_extintor IN (");
+        for (int i = 0; i < idsExtintores.size(); i++) {
+            sql.append("?");
+            if (i < idsExtintores.size() - 1) {
+                sql.append(",");
+            }
+        }
+        sql.append(")");
+
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql.append(" AND s.id_filial = ?");
+        }
+        sql.append(" ORDER BY e.id_extintor");
+
+        try (Connection conn = ConnectionFactory.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int index = 1;
+            for (Integer idExtintor : idsExtintores) {
+                stmt.setInt(index++, idExtintor);
+            }
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmt.setInt(index, usuarioLogado.getIdFilial());
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    resultado.add(popularExtintor(rs));
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao carregar extintores por IDs!", ex);
+        }
+        return resultado;
+    }
+
     private boolean existeNumeroControleNaFilial(String numeroControle, int idSetor, Integer idExtintorAtual) {
         if (numeroControle == null || numeroControle.trim().isEmpty()) {
             return false;
