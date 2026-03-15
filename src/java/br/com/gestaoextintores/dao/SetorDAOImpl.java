@@ -4,7 +4,11 @@ import br.com.gestaoextintores.model.Filial;
 import br.com.gestaoextintores.model.Setor;
 import br.com.gestaoextintores.model.Usuario;
 import br.com.gestaoextintores.util.ConnectionFactory;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -15,13 +19,14 @@ public class SetorDAOImpl {
     private static final Logger LOGGER = Logger.getLogger(SetorDAOImpl.class.getName());
 
     public SetorDAOImpl() {}
+
     private boolean existeNomeSetorNaFilial(String nome, int idFilial, Integer idSetorAtual) {
-        if (nome == null || nome.trim().isEmpty()) { 
+        if (nome == null || nome.trim().isEmpty()) {
             return false;
         }
         String sql = "SELECT COUNT(id_setor) FROM setor WHERE UPPER(nome) = UPPER(?) AND id_filial = ? ";
-        if (idSetorAtual != null) { 
-            sql += " AND id_setor != ?"; 
+        if (idSetorAtual != null) {
+            sql += " AND id_setor != ?";
         }
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -29,8 +34,8 @@ public class SetorDAOImpl {
             int paramIndex = 1;
             stmt.setString(paramIndex++, nome);
             stmt.setInt(paramIndex++, idFilial);
-            if (idSetorAtual != null) { 
-                stmt.setInt(paramIndex++, idSetorAtual); 
+            if (idSetorAtual != null) {
+                stmt.setInt(paramIndex++, idSetorAtual);
             }
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next() && rs.getInt(1) > 0) {
@@ -65,20 +70,22 @@ public class SetorDAOImpl {
             return true;
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao cadastrar setor!", ex);
-            if (conn != null) { 
-                try { conn.rollback(); 
-                } catch (SQLException rbEx) { 
-                    LOGGER.log(Level.SEVERE, "Erro rollback!", rbEx); 
-                } 
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rbEx) {
+                    LOGGER.log(Level.SEVERE, "Erro rollback!", rbEx);
+                }
             }
             return false;
         } finally {
-             if (conn != null) { 
-                 try { ConnectionFactory.closeConnection(conn); 
-                 } catch (Exception closeEx) { 
-                     LOGGER.log(Level.SEVERE, "Erro fechar conexão!", closeEx); 
-                 } 
-             }
+            if (conn != null) {
+                try {
+                    ConnectionFactory.closeConnection(conn);
+                } catch (Exception closeEx) {
+                    LOGGER.log(Level.SEVERE, "Erro fechar conexao!", closeEx);
+                }
+            }
         }
     }
 
@@ -135,26 +142,26 @@ public class SetorDAOImpl {
     public Boolean alterar(Setor setor, Usuario usuarioLogado) {
         Integer idFilialAtual = null;
         String sqlBuscaFilial = "SELECT id_filial FROM setor WHERE id_setor = ?";
-         if ("Técnico".equals(usuarioLogado.getPerfil())) { 
-             sqlBuscaFilial += " AND id_filial = ?"; 
-         }
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sqlBuscaFilial += " AND id_filial = ?";
+        }
         try (Connection connCheck = ConnectionFactory.getConnection();
              PreparedStatement stmtCheck = connCheck.prepareStatement(sqlBuscaFilial)) {
             stmtCheck.setInt(1, setor.getIdSetor());
-             if ("Técnico".equals(usuarioLogado.getPerfil())) { 
-                 stmtCheck.setInt(2, usuarioLogado.getIdFilial()); 
-             }
+            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+                stmtCheck.setInt(2, usuarioLogado.getIdFilial());
+            }
             try (ResultSet rsCheck = stmtCheck.executeQuery()) {
                 if (rsCheck.next()) {
                     idFilialAtual = rsCheck.getInt("id_filial");
                 } else {
-                     LOGGER.log(Level.WARNING, "Setor ID {0} não encontrado ou sem permissão para buscar filial.", setor.getIdSetor());
+                    LOGGER.log(Level.WARNING, "Setor ID {0} nao encontrado ou sem permissao para buscar filial.", setor.getIdSetor());
                     return false;
                 }
             }
         } catch (Exception exCheck) {
-             LOGGER.log(Level.SEVERE, "Erro ao buscar id_filial para verificação de duplicidade!", exCheck);
-             return false;
+            LOGGER.log(Level.SEVERE, "Erro ao buscar id_filial para verificacao de duplicidade!", exCheck);
+            return false;
         }
         if (idFilialAtual != null && existeNomeSetorNaFilial(setor.getNome(), idFilialAtual, setor.getIdSetor())) {
             return false;
@@ -171,67 +178,74 @@ public class SetorDAOImpl {
             conn = ConnectionFactory.getConnection();
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-             try (PreparedStatement stmt = conn.prepareStatement(sqlUpdate)) {
+            try (PreparedStatement stmt = conn.prepareStatement(sqlUpdate)) {
                 stmt.setString(1, setor.getNome());
                 stmt.setInt(2, setor.getIdSetor());
-                if (idFilialDoUsuario != null) { 
-                    stmt.setInt(3, idFilialDoUsuario); 
+                if (idFilialDoUsuario != null) {
+                    stmt.setInt(3, idFilialDoUsuario);
                 }
                 stmt.executeUpdate();
-             }
+            }
             conn.commit();
-            LOGGER.log(Level.INFO,"Setor ID {0} alterado com sucesso.", setor.getIdSetor());
+            LOGGER.log(Level.INFO, "Setor ID {0} alterado com sucesso.", setor.getIdSetor());
             return true;
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao atualizar setor!", ex);
-             if (conn != null) { 
-                 try { conn.rollback(); 
-                 } catch (SQLException rbEx) {
-                 } 
-             }
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rbEx) {
+                }
+            }
             return false;
         } finally {
-            if (conn != null) { 
-                try { ConnectionFactory.closeConnection(conn); 
+            if (conn != null) {
+                try {
+                    ConnectionFactory.closeConnection(conn);
                 } catch (Exception e) {
-                } 
+                }
             }
         }
     }
 
     public Boolean excluir(int idSetor, Usuario usuarioLogado) {
         String sql = "DELETE FROM setor WHERE id_setor = ?";
-         Integer idFilialDoUsuario = null;
-        if ("Técnico".equals(usuarioLogado.getPerfil())) { 
-            sql += " AND id_filial = ?"; idFilialDoUsuario = usuarioLogado.getIdFilial(); 
+        Integer idFilialDoUsuario = null;
+        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            sql += " AND id_filial = ?";
+            idFilialDoUsuario = usuarioLogado.getIdFilial();
         }
         Connection conn = null;
         try {
-             conn = ConnectionFactory.getConnection(); 
-             conn.setAutoCommit(false); 
-             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, idSetor);
-                if (idFilialDoUsuario != null) { 
-                    stmt.setInt(2, idFilialDoUsuario); 
+                if (idFilialDoUsuario != null) {
+                    stmt.setInt(2, idFilialDoUsuario);
                 }
                 stmt.executeUpdate();
             }
             conn.commit();
-            LOGGER.log(Level.INFO,"Setor ID {0} excluído com sucesso.", idSetor);
+            LOGGER.log(Level.INFO, "Setor ID {0} excluido com sucesso.", idSetor);
             return true;
-        } catch (Exception ex) { 
-            LOGGER.log(Level.SEVERE, "Erro ao excluir setor!", ex); 
-            if (conn != null) { 
-                try { conn.rollback(); 
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao excluir setor!", ex);
+            if (conn != null) {
+                try {
+                    conn.rollback();
                 } catch (SQLException rbEx) {
-                } 
-            } return false;
-        } finally { if (conn != null) { 
-            try { ConnectionFactory.closeConnection(conn); 
-            } catch (Exception e) {
-            } 
-        } 
+                }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    ConnectionFactory.closeConnection(conn);
+                } catch (Exception e) {
+                }
+            }
         }
     }
 
