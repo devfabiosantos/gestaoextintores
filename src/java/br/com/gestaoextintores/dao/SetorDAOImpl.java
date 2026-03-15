@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 public class SetorDAOImpl {
 
     private static final Logger LOGGER = Logger.getLogger(SetorDAOImpl.class.getName());
+    private static final String PERFIL_TECNICO = "Técnico";
 
     public SetorDAOImpl() {}
 
@@ -93,7 +94,7 @@ public class SetorDAOImpl {
         List<Setor> resultado = new ArrayList<>();
         String sql = "SELECT s.*, f.nome as nome_filial FROM setor s JOIN filial f ON s.id_filial = f.id_filial";
         Integer idFilialParaFiltrar = null;
-        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+        if (PERFIL_TECNICO.equals(usuarioLogado.getPerfil())) {
             sql += " WHERE s.id_filial = ?";
             idFilialParaFiltrar = usuarioLogado.getIdFilial();
         }
@@ -118,7 +119,7 @@ public class SetorDAOImpl {
         Setor setor = null;
         String sql = "SELECT s.*, f.nome as nome_filial FROM setor s JOIN filial f ON s.id_filial = f.id_filial WHERE s.id_setor = ?";
         Integer idFilialDoUsuario = null;
-        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+        if (PERFIL_TECNICO.equals(usuarioLogado.getPerfil())) {
             sql += " AND s.id_filial = ?";
             idFilialDoUsuario = usuarioLogado.getIdFilial();
         }
@@ -142,13 +143,13 @@ public class SetorDAOImpl {
     public Boolean alterar(Setor setor, Usuario usuarioLogado) {
         Integer idFilialAtual = null;
         String sqlBuscaFilial = "SELECT id_filial FROM setor WHERE id_setor = ?";
-        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+        if (PERFIL_TECNICO.equals(usuarioLogado.getPerfil())) {
             sqlBuscaFilial += " AND id_filial = ?";
         }
         try (Connection connCheck = ConnectionFactory.getConnection();
              PreparedStatement stmtCheck = connCheck.prepareStatement(sqlBuscaFilial)) {
             stmtCheck.setInt(1, setor.getIdSetor());
-            if ("Técnico".equals(usuarioLogado.getPerfil())) {
+            if (PERFIL_TECNICO.equals(usuarioLogado.getPerfil())) {
                 stmtCheck.setInt(2, usuarioLogado.getIdFilial());
             }
             try (ResultSet rsCheck = stmtCheck.executeQuery()) {
@@ -169,7 +170,7 @@ public class SetorDAOImpl {
 
         String sqlUpdate = "UPDATE setor SET nome = ? WHERE id_setor = ?";
         Integer idFilialDoUsuario = null;
-        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+        if (PERFIL_TECNICO.equals(usuarioLogado.getPerfil())) {
             sqlUpdate += " AND id_filial = ?";
             idFilialDoUsuario = usuarioLogado.getIdFilial();
         }
@@ -184,7 +185,11 @@ public class SetorDAOImpl {
                 if (idFilialDoUsuario != null) {
                     stmt.setInt(3, idFilialDoUsuario);
                 }
-                stmt.executeUpdate();
+                int affectedRows = stmt.executeUpdate();
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    return false;
+                }
             }
             conn.commit();
             LOGGER.log(Level.INFO, "Setor ID {0} alterado com sucesso.", setor.getIdSetor());
@@ -211,7 +216,7 @@ public class SetorDAOImpl {
     public Boolean excluir(int idSetor, Usuario usuarioLogado) {
         String sql = "DELETE FROM setor WHERE id_setor = ?";
         Integer idFilialDoUsuario = null;
-        if ("Técnico".equals(usuarioLogado.getPerfil())) {
+        if (PERFIL_TECNICO.equals(usuarioLogado.getPerfil())) {
             sql += " AND id_filial = ?";
             idFilialDoUsuario = usuarioLogado.getIdFilial();
         }
@@ -225,7 +230,11 @@ public class SetorDAOImpl {
                 if (idFilialDoUsuario != null) {
                     stmt.setInt(2, idFilialDoUsuario);
                 }
-                stmt.executeUpdate();
+                int affectedRows = stmt.executeUpdate();
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    return false;
+                }
             }
             conn.commit();
             LOGGER.log(Level.INFO, "Setor ID {0} excluído com sucesso.", idSetor);

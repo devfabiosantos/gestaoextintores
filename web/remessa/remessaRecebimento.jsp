@@ -11,7 +11,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Confirmar Recebimento - Remessa ID ${param.idRemessa}</title>
+    <title>Confirmar Recebimento - Remessa ID ${not empty remessa ? remessa.idRemessa : param.idRemessa}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -19,7 +19,7 @@
 <div class="container mt-5 mb-5">
     <div class="card shadow-sm border-0 rounded-3">
         <div class="card-header bg-info text-white">
-            <h4 class="mb-0">Confirmar Recebimento da Remessa ID: ${param.idRemessa}</h4>
+            <h4 class="mb-0">Confirmar Recebimento da Remessa ID: ${not empty remessa ? remessa.idRemessa : param.idRemessa}</h4>
         </div>
         <div class="card-body">
 
@@ -30,17 +30,17 @@
             <p>Por favor, informe as datas de recarga e validade conforme as etiquetas dos extintores recebidos.</p>
             <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" class="needs-validation" novalidate>
                 <input type="hidden" name="acao" value="finalizarRecebimento" />
-                <input type="hidden" name="idRemessa" value="${param.idRemessa}" />
+                <input type="hidden" name="idRemessa" value="${not empty remessa ? remessa.idRemessa : param.idRemessa}" />
 
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="dataRecargaReal" class="form-label">Data de Recarga Efetiva*</label>
-                        <input type="date" class="form-control" id="dataRecargaReal" name="dataRecargaReal" required>
+                        <input type="date" class="form-control" id="dataRecargaReal" name="dataRecargaReal" value="${param.dataRecargaReal}" required>
                         <div class="invalid-feedback">Informe a data real da recarga.</div>
                     </div>
                     <div class="col-md-6">
                         <label for="novaDataValidade" class="form-label">Nova Data de Validade*</label>
-                        <input type="date" class="form-control" id="novaDataValidade" name="novaDataValidade" required>
+                        <input type="date" class="form-control" id="novaDataValidade" name="novaDataValidade" value="${param.novaDataValidade}" required>
                         <div class="invalid-feedback">Informe a nova data de validade.</div>
                     </div>
                 </div>
