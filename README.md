@@ -1,203 +1,203 @@
-# GestaoExtintores
+# Gestão de Extintores
 
 ## Executive Summary
 
-GestaoExtintores is an enterprise-oriented web application for operational governance of fire extinguisher assets across multiple branches. It consolidates registration, allocation, maintenance workflows, remittance for recharge, and role-based administration in a single server-side platform built with Java Servlet, JSP, and DAO patterns.
+Gestão de Extintores é uma aplicação web corporativa voltada à governança operacional de extintores distribuídos em múltiplas filiais. O sistema consolida cadastro, alocação, fluxo de manutenção, remessas para recarga e administração por perfil em uma única plataforma server-side construída com Java Servlet, JSP e DAO.
 
-The solution is positioned for organizations that require traceability, procedural discipline, and auditability throughout the extinguisher lifecycle. Its current implementation supports both centralized administrative control and branch-level technical execution.
+A solução atende organizações que precisam de rastreabilidade, disciplina operacional e auditabilidade ao longo do ciclo de vida dos extintores. A implementação atual suporta tanto controle administrativo centralizado quanto execução técnica no nível da filial.
 
 ## Business Context
 
-Fire extinguisher management is operationally sensitive and compliance-driven. Organizations need to know:
+A gestão de extintores é um processo sensível do ponto de vista operacional e de conformidade. Em termos práticos, a organização precisa saber:
 
-- where each extinguisher is located
-- which branch and sector it belongs to
-- its technical characteristics and validity date
-- whether it is operational, in remittance, or in recharge
-- who initiated and approved each movement in the maintenance cycle
+- onde cada extintor está localizado
+- a qual filial e setor ele pertence
+- quais são suas características técnicas e sua validade
+- se ele está operacional, em remessa ou em recarga
+- quem iniciou, aprovou ou concluiu cada movimentação do fluxo
 
-GestaoExtintores addresses this by organizing the domain around five main capabilities:
+Gestão de Extintores organiza esse domínio em cinco capacidades principais:
 
-- branch administration
-- sector administration
-- user and role administration
-- extinguisher inventory control
-- remittance and recharge workflow management
+- administração de filiais
+- administração de setores
+- administração de usuários e perfis
+- controle de inventário de extintores
+- gestão do fluxo de remessa e recarga
 
 ## Enterprise Value Proposition
 
-GestaoExtintores generates value by reducing operational ambiguity and strengthening lifecycle traceability.
+Gestão de Extintores gera valor ao reduzir ambiguidade operacional e aumentar a rastreabilidade do ciclo de vida dos ativos.
 
-- Improves visibility of extinguisher distribution across branches and sectors.
-- Reduces manual effort in recharge and remittance tracking.
-- Strengthens accountability by associating actions with authenticated users.
-- Helps standardize execution between administrative and technical roles.
-- Establishes a platform for stronger compliance support, auditability, and future reporting.
+- Melhora a visibilidade da distribuição de extintores entre filiais e setores.
+- Reduz esforço manual no acompanhamento de remessas e recargas.
+- Reforça responsabilização ao vincular ações a usuários autenticados.
+- Ajuda a padronizar a execução entre perfis administrativos e técnicos.
+- Cria base para evoluções em compliance, auditoria e relatórios operacionais.
 
 ## Core Domain Features
 
-- Authentication with session-based access control
-- Role model with `Admin` and `Técnico`
-- CRUD for `Filial`
-- CRUD for `Setor`
-- CRUD for `Usuário`
-- CRUD for `Extintor`
-- Remittance creation from selected extinguishers
-- Approval workflow for remittance recollection
-- Confirmation of recollection by technical users
-- Receipt finalization with recharge date and new validity date
-- Branch-based data scoping for technical users in key modules
+- autenticação com sessão
+- modelo de perfis com `Admin` e `Técnico`
+- CRUD de `Filial`
+- CRUD de `Setor`
+- CRUD de `Usuário`
+- CRUD de `Extintor`
+- criação de remessas a partir de extintores selecionados
+- aprovação administrativa do recolhimento
+- confirmação técnica de recolhimento
+- finalização do recebimento com data de recarga e nova validade
+- escopo por filial para usuários técnicos em módulos relevantes
 
 ## Security Model
 
-The current security model is pragmatic and server-side enforced.
+O modelo de segurança atual é pragmático e aplicado no backend.
 
-- Authentication is session-based through `LoginServlet`.
-- `AuthenticationFilter` protects all non-public routes.
-- Public entry points are limited to `login.jsp` and `LoginServlet`.
-- Administrative actions are restricted to `Admin`.
-- Technical users are scoped by branch in modules such as `extintor` and `remessa`.
-- Sensitive state transitions in remittance flows are validated in the backend.
-- Recent hardening work added protections against:
-  - self-deletion of the logged-in administrator
-  - invalid role-to-branch combinations for technical users
-  - silent failures in user, branch, and sector operations
-  - invalid remittance transitions by status
+- A autenticação é baseada em sessão, via `LoginServlet`.
+- O `AuthenticationFilter` protege as rotas não públicas.
+- As entradas públicas estão restritas a `login.jsp` e `LoginServlet`.
+- Ações administrativas são restritas ao perfil `Admin`.
+- Usuários técnicos são limitados por filial em módulos como `extintor` e `remessa`.
+- Transições sensíveis do fluxo de remessa são validadas no servidor.
+- O hardening recente adicionou proteções contra:
+  - autoexclusão do administrador logado
+  - combinações inválidas entre perfil técnico e filial
+  - falhas silenciosas em operações de usuário, filial e setor
+  - transições inválidas de remessa por status
 
-This is not yet a full enterprise IAM model. There is currently no external identity provider, centralized RBAC policy engine, CSRF layer, or fine-grained authorization framework.
+Este ainda não é um modelo completo de IAM corporativo. Hoje não há provedor externo de identidade, mecanismo centralizado de RBAC, camada de CSRF ou framework de autorização fina.
 
 ## Architecture - C4 Level 1
 
-### System Context
+### Contexto do Sistema
 
-At C4 Level 1, the solution is a single server-side web application interacting with human users and a PostgreSQL database.
+No C4 Nível 1, a solução é uma única aplicação web server-side que interage com usuários humanos e com um banco PostgreSQL.
 
 ```text
 +-------------------+         +-----------------------------------+         +----------------------+
-| Admin User        | ----->  | GestaoExtintores Web Application | ----->  | PostgreSQL Database  |
-| Tecnico User      | <-----  | Servlet + JSP + DAO monolith     | <-----  | Operational storage  |
+| Usuário Admin     | ----->  | Aplicação Gestão de Extintores   | ----->  | Banco PostgreSQL     |
+| Usuário Técnico   | <-----  | Monólito Servlet + JSP + DAO     | <-----  | Persistência         |
 +-------------------+         +-----------------------------------+         +----------------------+
 ```
 
-### External Actors
+### Atores Externos
 
 - `Admin`
-  - manages users, branches, sectors, and operational approvals
+  - gerencia usuários, filiais, setores e aprovações operacionais
 - `Técnico`
-  - manages field-facing extinguisher and remittance activities within branch scope
+  - executa atividades operacionais de extintor e remessa dentro do escopo da filial
 
-### External System
+### Sistema Externo
 
 - `PostgreSQL`
-  - stores users, branches, sectors, extinguishers, remittances, and remittance items
+  - armazena usuários, filiais, setores, extintores, remessas e itens de remessa
 
 ## Architecture - Application Structure
 
-The current solution is best described as a classic layered Java web monolith.
+A solução atual é melhor descrita como um monólito web Java clássico em camadas.
 
-### Current Architectural Style
+### Estilo Arquitetural Atual
 
-- Presentation layer with `JSP`
-- Request orchestration in `Servlets`
-- Persistence logic in `DAO` classes
-- Domain entities in `model`
-- Global request protection in `AuthenticationFilter`
+- camada de apresentação com `JSP`
+- orquestração de requisições com `Servlets`
+- lógica de persistência em classes `DAO`
+- entidades de domínio em `model`
+- proteção global de requisições em `AuthenticationFilter`
 
-This is not a true Hexagonal Architecture implementation today. There are no explicit ports/adapters boundaries, no application service layer, and no inversion around domain use cases yet.
+Hoje o projeto não implementa Arquitetura Hexagonal de forma real. Não existem portas e adaptadores formalizados, camada de aplicação explícita nem isolamento do domínio em torno de casos de uso.
 
-### Conceptual Evolution Toward Hexagonal
+### Evolução Conceitual para Hexagonal
 
-If the project evolves, a natural path would be:
+Se o projeto evoluir nessa direção, um caminho natural seria:
 
-- move business rules from servlets into application services
-- isolate persistence behind repository interfaces
-- keep servlets/JSP as delivery adapters
-- keep PostgreSQL DAO implementations as infrastructure adapters
+- mover regras de negócio dos servlets para serviços de aplicação
+- isolar persistência atrás de interfaces de repositório
+- manter servlets e JSPs como adaptadores de entrega
+- manter DAOs PostgreSQL como adaptadores de infraestrutura
 
-That evolution would make the application more testable, more modular, and closer to a proper hexagonal model. For now, this README documents the architecture as it actually exists rather than as an aspirational target.
+Essa evolução deixaria a aplicação mais testável, mais modular e mais próxima de um desenho hexagonal. Por enquanto, este README documenta a arquitetura como ela realmente existe, e não como meta aspiracional.
 
 ## Technology Stack
 
 - Java 8
 - Java Servlet API
-- JSP with JSTL
+- JSP com JSTL
 - Apache Ant
-- NetBeans project structure
+- estrutura de projeto NetBeans
 - PostgreSQL
 - GlassFish Server 5.x
-- Bootstrap 5 on the frontend
+- Bootstrap 5 no frontend
 
 ## Local Execution
 
-### Prerequisites
+### Pré-requisitos
 
 - JDK 8
 - Apache Ant
 - GlassFish Server
-- PostgreSQL running locally
-- Database `gestao_extintores`
+- PostgreSQL local em execução
+- banco `gestao_extintores`
 
-### Current Database Configuration
+### Configuração Atual de Banco
 
-At the moment, database access is configured directly in source code at [ConnectionFactory.java](C:/GestaoExtintores/GestaoExtintores/src/java/br/com/gestaoextintores/util/ConnectionFactory.java).
+No estado atual, a conexão com banco está configurada diretamente no código-fonte em [ConnectionFactory.java](C:/GestaoExtintores/GestaoExtintores/src/java/br/com/gestaoextintores/util/ConnectionFactory.java).
 
 - Host: `localhost`
-- Port: `5432`
-- Database: `gestao_extintores`
-- User: `postgres`
+- Porta: `5432`
+- Banco: `gestao_extintores`
+- Usuário: `postgres`
 
-For production-grade operation, this should be externalized into environment-specific configuration.
+Para operação com padrão de produção, essa configuração deve ser externalizada por ambiente.
 
 ### Build
 
-From the repository root:
+A partir da raiz do repositório:
 
 ```powershell
 $env:JAVA_HOME='C:\Program Files\Java\jdk1.8.0_202'
 & 'C:\Program Files\NetBeans-12.1\netbeans\extide\ant\bin\ant.bat' clean dist
 ```
 
-This generates:
+Artefato gerado:
 
 - `dist/GestaoExtintores.war`
 
 ### Deploy
 
-Example deployment to GlassFish:
+Exemplo de deploy no GlassFish:
 
 ```powershell
 & 'C:\Users\Voce2\GlassFish_Server\bin\asadmin.bat' deploy --force=true --contextroot GestaoExtintores 'C:\GestaoExtintores\GestaoExtintores\dist\GestaoExtintores.war'
 ```
 
-### Application URL
+### URL da Aplicação
 
 - `http://localhost:8080/GestaoExtintores/`
 
 ## Example Scenarios
 
-### Scenario 1 - Administrative setup
+### Cenário 1 - Estrutura organizacional
 
-1. Admin authenticates in the application.
-2. Admin registers branches and sectors.
-3. Admin creates users and assigns role plus branch where applicable.
+1. O administrador autentica na aplicação.
+2. O administrador cadastra filiais e setores.
+3. O administrador cria usuários e define perfil e filial quando aplicável.
 
-### Scenario 2 - Technical remittance creation
+### Cenário 2 - Criação de remessa pelo técnico
 
-1. Técnico accesses the extinguisher list.
-2. Técnico selects one or more extinguishers.
-3. System creates a remittance and updates extinguisher status to `Em Remessa`.
+1. O técnico acessa a lista de extintores.
+2. O técnico seleciona um ou mais extintores.
+3. O sistema cria a remessa e atualiza o status dos extintores para `Em Remessa`.
 
-### Scenario 3 - Administrative approval
+### Cenário 3 - Aprovação administrativa
 
-1. Admin opens remittance details.
-2. Admin approves recollection.
-3. System moves the remittance to the next valid workflow stage.
+1. O administrador acessa o detalhe da remessa.
+2. O administrador aprova o recolhimento.
+3. O sistema move a remessa para a próxima etapa válida do fluxo.
 
-### Scenario 4 - Technical receipt finalization
+### Cenário 4 - Finalização técnica do recebimento
 
-1. Técnico confirms recollection.
-2. Técnico informs recharge date and new validity date.
-3. System finalizes the remittance and updates extinguisher operational data.
+1. O técnico confirma o recolhimento.
+2. O técnico informa a data real da recarga e a nova validade.
+3. O sistema conclui a remessa e atualiza os dados operacionais dos extintores.
 
 ## Project Structure
 
@@ -206,63 +206,63 @@ src/
   java/
     br/com/gestaoextintores/
       controller/    -> Servlets
-      dao/           -> Persistence access
-      filter/        -> Request authentication and access filter
-      model/         -> Domain entities
-      util/          -> Infrastructure helpers
+      dao/           -> Persistência
+      filter/        -> Filtro de autenticação e acesso
+      model/         -> Entidades de domínio
+      util/          -> Utilitários de infraestrutura
 web/
-  extintor/         -> JSPs for extinguisher flows
-  filial/           -> JSPs for branch flows
-  remessa/          -> JSPs for remittance flows
-  setor/            -> JSPs for sector flows
-  usuario/          -> JSPs for user flows
-  index.jsp         -> Home page
-  login.jsp         -> Login page
-build.xml           -> Ant build entry point
-nbproject/          -> NetBeans project metadata
+  extintor/         -> JSPs do módulo de extintores
+  filial/           -> JSPs do módulo de filiais
+  remessa/          -> JSPs do módulo de remessas
+  setor/            -> JSPs do módulo de setores
+  usuario/          -> JSPs do módulo de usuários
+  index.jsp         -> Página inicial
+  login.jsp         -> Página de login
+build.xml           -> Entrada de build com Ant
+nbproject/          -> Metadados do projeto NetBeans
 ```
-
-## Design Philosophy
-
-The project follows a pragmatic and operationally focused design philosophy.
-
-- Keep the application simple to run in a local enterprise environment.
-- Favor direct server-side rendering over frontend complexity.
-- Enforce critical business rules in the backend, not only in the UI.
-- Maintain traceability for workflow transitions and role-sensitive actions.
-- Prefer incremental hardening over disruptive rewrites.
-
-Recent maintenance followed this principle directly: stabilize the current architecture first, then improve robustness around permissions, validation, and workflow state transitions.
 
 ## Roadmap
 
-### Short Term
+### Curto Prazo
 
-- externalize database credentials from source code
-- centralize repeated authorization checks
-- improve consistency of error and success messaging
-- add safer validation around remaining CRUD flows
-- expand runtime smoke tests for critical workflows
+- externalizar credenciais de banco
+- centralizar verificações repetidas de autorização
+- melhorar consistência de mensagens de erro e sucesso
+- ampliar validações em CRUDs ainda não endurecidos
+- expandir smoke tests para fluxos críticos
 
-### Medium Term
+### Médio Prazo
 
-- introduce service layer abstractions for business use cases
-- reduce business-rule duplication across servlets and DAOs
-- improve auditability and operational reporting
-- strengthen deployment documentation and environment separation
+- introduzir camada de serviços de aplicação
+- reduzir duplicação de regras entre servlets e DAOs
+- melhorar auditabilidade e relatórios operacionais
+- fortalecer documentação de deploy e separação por ambiente
 
-### Long Term
+### Longo Prazo
 
-- move toward cleaner application boundaries
-- enable automated regression testing for domain workflows
-- prepare architecture for broader enterprise integrations
+- evoluir para fronteiras arquiteturais mais limpas
+- habilitar regressão automatizada para fluxos de domínio
+- preparar a base para integrações corporativas futuras
+
+## Design Philosophy
+
+O projeto segue uma filosofia pragmática e orientada à operação.
+
+- manter a aplicação simples de executar em ambiente corporativo local
+- privilegiar renderização server-side em vez de complexidade desnecessária no frontend
+- aplicar regras críticas no backend, e não apenas na interface
+- preservar rastreabilidade em transições de fluxo e ações sensíveis por perfil
+- evoluir por hardening incremental antes de grandes reescritas
+
+As manutenções recentes seguiram exatamente esse princípio: estabilizar a arquitetura atual primeiro e, em seguida, aumentar robustez em permissões, validações e transições de estado.
 
 ## Notes for Maintainers
 
-The repository has recently gone through:
+O repositório passou recentemente por:
 
-- functional hardening in `usuario`, `filial`, `setor`, and `remessa`
-- UTF-8 normalization in JSPs and Java sources
-- cleanup of legacy invalid test data used during validation
+- endurecimento funcional em `usuario`, `filial`, `setor` e `remessa`
+- normalização UTF-8 em JSPs e fontes Java
+- limpeza de dados legados inválidos usados durante a validação
 
-The current codebase is materially more stable than the original baseline, but it remains a classic servlet monolith. Future improvement work should keep that reality explicit and evolve the architecture deliberately rather than cosmetically.
+O código atual está materialmente mais estável do que a linha de base original, mas continua sendo um monólito clássico baseado em servlets. Melhorias futuras devem manter essa realidade explícita e evoluir a arquitetura de forma deliberada, não cosmética.
