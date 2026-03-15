@@ -83,9 +83,9 @@ public class ExtintorServlet extends HttpServlet {
                 int idExtintor = Integer.parseInt(request.getParameter("idExtintor"));
                 Extintor extintor = extintorDAO.carregar(idExtintor, usuarioLogado);
                 if (extintor == null) {
-                    LOGGER.log(Level.WARNING, "Tentativa de editar extintor inexistente ou nao permitido (ID: {0}) pelo usuario {1}",
+                    LOGGER.log(Level.WARNING, "Tentativa de editar extintor inexistente ou não permitido (ID: {0}) pelo usuário {1}",
                             new Object[]{idExtintor, usuarioLogado.getLogin()});
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Extintor nao encontrado ou acesso negado.");
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Extintor não encontrado ou acesso negado.");
                     return;
                 }
                 List<Setor> listaSetores = setorDAO.listar(usuarioLogado);
@@ -101,7 +101,7 @@ public class ExtintorServlet extends HttpServlet {
                 extintorDAO.excluir(idExtintor, usuarioLogado);
                 response.sendRedirect(request.getContextPath() + "/ExtintorServlet?acao=listar");
             } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acao GET invalida: " + acao);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação GET inválida: " + acao);
             }
 
         } catch (Exception ex) {
@@ -155,7 +155,7 @@ public class ExtintorServlet extends HttpServlet {
                 }
             } catch (ParseException e) {
                 LOGGER.log(Level.WARNING, "Erro ao converter datas", e);
-                request.setAttribute("mensagemErro", "Formato de data invalido.");
+                request.setAttribute("mensagemErro", "Formato de data inválido.");
                 jspDestino = "/extintor/" + ("salvar".equals(acao) ? "extintorCadastrar.jsp" : "extintorEditar.jsp");
                 request.setAttribute("listaSetores", setorDAO.listar(usuarioLogado));
                 request.setAttribute("listaStatus", statusDAO.listar());
@@ -196,7 +196,7 @@ public class ExtintorServlet extends HttpServlet {
                 if (sucessoOperacao) {
                     sessao.setAttribute("mensagemSucesso", "Extintor cadastrado com sucesso!");
                 } else {
-                    request.setAttribute("mensagemErro", "Falha ao cadastrar. Verifique se o Numero de Controle ja existe nesta filial.");
+                    request.setAttribute("mensagemErro", "Falha ao cadastrar. Verifique se o Número de Controle já existe nesta filial.");
                     request.setAttribute("extintor", extintor);
                     request.setAttribute("listaSetores", setorDAO.listar(usuarioLogado));
                     request.setAttribute("listaStatus", statusDAO.listar());
@@ -212,7 +212,7 @@ public class ExtintorServlet extends HttpServlet {
                 if (sucessoOperacao) {
                     sessao.setAttribute("mensagemSucesso", "Extintor alterado com sucesso!");
                 } else {
-                    request.setAttribute("mensagemErro", "Falha ao alterar. Verifique se o Numero de Controle ja existe nesta filial.");
+                    request.setAttribute("mensagemErro", "Falha ao alterar. Verifique se o Número de Controle já existe nesta filial.");
                     request.setAttribute("extintor", extintor);
                     request.setAttribute("listaSetores", setorDAO.listar(usuarioLogado));
                     request.setAttribute("listaStatus", statusDAO.listar());
@@ -221,7 +221,7 @@ public class ExtintorServlet extends HttpServlet {
                 }
 
             } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acao POST invalida.");
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação POST inválida.");
                 return;
             }
 
@@ -234,7 +234,7 @@ public class ExtintorServlet extends HttpServlet {
 
         } catch (NumberFormatException ex) {
             LOGGER.log(Level.WARNING, "Erro ao converter IDs no doPost", ex);
-            sessao.setAttribute("mensagemErro", "ID invalido fornecido para Setor, Status ou Extintor.");
+            sessao.setAttribute("mensagemErro", "ID inválido fornecido para Setor, Status ou Extintor.");
             response.sendRedirect(request.getContextPath() + "/ExtintorServlet?acao=listar");
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro GERAL no doPost do ExtintorServlet", ex);

@@ -82,8 +82,8 @@ public class RemessaServlet extends HttpServlet {
                 int idRemessa = Integer.parseInt(request.getParameter("idRemessa"));
                 Remessa remessa = remessaDAO.carregar(idRemessa, usuarioLogado);
                 if (remessa == null) {
-                    LOGGER.warning("Remessa nao encontrada ou acesso negado pelo DAO.");
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Remessa nao encontrada ou acesso negado.");
+                    LOGGER.warning("Remessa não encontrada ou acesso negado pelo DAO.");
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Remessa não encontrada ou acesso negado.");
                     return;
                 }
                 RemessaItemDAO itemDAO = new RemessaItemDAO();
@@ -102,7 +102,7 @@ public class RemessaServlet extends HttpServlet {
                 RequestDispatcher rd = request.getRequestDispatcher("/remessa/remessaRecebimento.jsp");
                 rd.forward(request, response);
             } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acao GET invalida: " + acao);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação GET inválida: " + acao);
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erro GERAL no doGet do RemessaServlet", e);
@@ -139,7 +139,7 @@ public class RemessaServlet extends HttpServlet {
                     LOGGER.warning("Nenhum extintor selecionado.");
                     sessao.setAttribute("mensagemErro", "Nenhum extintor selecionado.");
                     redirectUrl = request.getContextPath() + "/ExtintorServlet?acao=listar";
-                    throw new Exception("Selecao vazia");
+                    throw new Exception("Seleção vazia");
                 }
                 List<Integer> idsExtintores = new ArrayList<>();
                 for (String idStr : idsSelecionadosStr) {
@@ -166,7 +166,7 @@ public class RemessaServlet extends HttpServlet {
                 }
                 int idStatusEmRemessa = statusDAO.getIdPorNome(STATUS_EM_REMESSA);
                 if (idStatusEmRemessa == -1) {
-                    throw new ServletException("Status '" + STATUS_EM_REMESSA + "' nao encontrado.");
+                    throw new ServletException("Status '" + STATUS_EM_REMESSA + "' não encontrado.");
                 }
                 boolean statusAtualizado = extintorDAO.atualizarStatusVarios(idsExtintores, idStatusEmRemessa, usuarioLogado);
                 if (!statusAtualizado) {
@@ -194,7 +194,7 @@ public class RemessaServlet extends HttpServlet {
                 int idRemessa = Integer.parseInt(request.getParameter("idRemessa"));
                 int idStatusEmRecarga = statusDAO.getIdPorNome(STATUS_EM_RECARGA);
                 if (idStatusEmRecarga == -1) {
-                    throw new ServletException("Status '" + STATUS_EM_RECARGA + "' nao encontrado.");
+                    throw new ServletException("Status '" + STATUS_EM_RECARGA + "' não encontrado.");
                 }
                 boolean confirmado = remessaDAO.confirmarRecolhimento(idRemessa);
                 if (!confirmado) {
@@ -226,20 +226,20 @@ public class RemessaServlet extends HttpServlet {
                 try {
                     if (dataRecargaRealStr == null || dataRecargaRealStr.isEmpty()
                             || novaDataValidadeStr == null || novaDataValidadeStr.isEmpty()) {
-                        throw new ParseException("Datas obrigatorias.", 0);
+                        throw new ParseException("Datas obrigatórias.", 0);
                     }
                     dataRecargaReal = DATE_FORMAT_FORM.parse(dataRecargaRealStr);
                     novaDataValidade = DATE_FORMAT_FORM.parse(novaDataValidadeStr);
                 } catch (ParseException e) {
                     LOGGER.log(Level.WARNING, "Erro ao converter datas.", e);
-                    request.setAttribute("mensagemErro", "Datas invalidas.");
+                    request.setAttribute("mensagemErro", "Datas inválidas.");
                     RequestDispatcher rd = request.getRequestDispatcher("/remessa/remessaRecebimento.jsp");
                     rd.forward(request, response);
                     return;
                 }
                 int idStatusOperacional = statusDAO.getIdPorNome(STATUS_OPERACIONAL);
                 if (idStatusOperacional == -1) {
-                    throw new ServletException("Status '" + STATUS_OPERACIONAL + "' nao encontrado.");
+                    throw new ServletException("Status '" + STATUS_OPERACIONAL + "' não encontrado.");
                 }
                 boolean concluido = remessaDAO.concluirRemessa(idRemessa);
                 if (!concluido) {
@@ -252,7 +252,7 @@ public class RemessaServlet extends HttpServlet {
                         idsExtintores.add(item.getIdExtintor());
                     }
                     if (!extintorDAO.atualizarDadosPosRecarga(idsExtintores, idStatusOperacional, dataRecargaReal, novaDataValidade, usuarioLogado)) {
-                        throw new ServletException("Falha ao atualizar dados pos-recarga (ID: " + idRemessa + ")");
+                        throw new ServletException("Falha ao atualizar dados pós-recarga (ID: " + idRemessa + ")");
                     }
                 } else {
                     LOGGER.log(Level.WARNING, "Remessa ID {0} sem itens ao finalizar recebimento.", idRemessa);
@@ -260,7 +260,7 @@ public class RemessaServlet extends HttpServlet {
                 sessao.setAttribute("mensagemSucesso", "Recebimento da Remessa ID " + idRemessa + " confirmado!");
 
             } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acao POST invalida: " + acao);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação POST inválida: " + acao);
                 return;
             }
 
@@ -275,6 +275,6 @@ public class RemessaServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Controlador para o fluxo de Remessa/Orcamento";
+        return "Controlador para o fluxo de Remessa/Orçamento";
     }
 }

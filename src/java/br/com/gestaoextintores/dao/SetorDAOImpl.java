@@ -83,7 +83,7 @@ public class SetorDAOImpl {
                 try {
                     ConnectionFactory.closeConnection(conn);
                 } catch (Exception closeEx) {
-                    LOGGER.log(Level.SEVERE, "Erro fechar conexao!", closeEx);
+                    LOGGER.log(Level.SEVERE, "Erro fechar conexão!", closeEx);
                 }
             }
         }
@@ -155,12 +155,12 @@ public class SetorDAOImpl {
                 if (rsCheck.next()) {
                     idFilialAtual = rsCheck.getInt("id_filial");
                 } else {
-                    LOGGER.log(Level.WARNING, "Setor ID {0} nao encontrado ou sem permissao para buscar filial.", setor.getIdSetor());
+                    LOGGER.log(Level.WARNING, "Setor ID {0} não encontrado ou sem permissão para buscar filial.", setor.getIdSetor());
                     return false;
                 }
             }
         } catch (Exception exCheck) {
-            LOGGER.log(Level.SEVERE, "Erro ao buscar id_filial para verificacao de duplicidade!", exCheck);
+            LOGGER.log(Level.SEVERE, "Erro ao buscar id_filial para verificação de duplicidade!", exCheck);
             return false;
         }
         if (idFilialAtual != null && existeNomeSetorNaFilial(setor.getNome(), idFilialAtual, setor.getIdSetor())) {
@@ -228,7 +228,7 @@ public class SetorDAOImpl {
                 stmt.executeUpdate();
             }
             conn.commit();
-            LOGGER.log(Level.INFO, "Setor ID {0} excluido com sucesso.", idSetor);
+            LOGGER.log(Level.INFO, "Setor ID {0} excluído com sucesso.", idSetor);
             return true;
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao excluir setor!", ex);

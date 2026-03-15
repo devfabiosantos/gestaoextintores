@@ -75,21 +75,21 @@ public class UsuarioDAO {
                     if (generatedKeys.next()) {
                         idGerado = generatedKeys.getInt(1);
                     } else {
-                        throw new SQLException("Falha ao obter ID gerado para usuario.");
+                        throw new SQLException("Falha ao obter ID gerado para usuário.");
                     }
                 }
             }
             conn.commit();
-            LOGGER.log(Level.INFO, "Usuario cadastrado com sucesso (ID: {0})", idGerado);
+            LOGGER.log(Level.INFO, "Usuário cadastrado com sucesso (ID: {0})", idGerado);
             return idGerado;
 
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao cadastrar usuario!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao cadastrar usuário!", ex);
             if (conn != null) {
                 try {
                     conn.rollback();
                 } catch (SQLException rbEx) {
-                    LOGGER.log(Level.SEVERE, "Erro critico ao tentar rollback!", rbEx);
+                    LOGGER.log(Level.SEVERE, "Erro crítico ao tentar rollback!", rbEx);
                 }
             }
             return -1;
@@ -98,7 +98,7 @@ public class UsuarioDAO {
                 try {
                     ConnectionFactory.closeConnection(conn);
                 } catch (Exception closeEx) {
-                    LOGGER.log(Level.SEVERE, "Erro ao fechar conexao!", closeEx);
+                    LOGGER.log(Level.SEVERE, "Erro ao fechar conexão!", closeEx);
                 }
             }
         }
@@ -130,7 +130,7 @@ public class UsuarioDAO {
                 }
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao listar usuarios com filtro!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao listar usuários com filtro!", ex);
         }
         return resultado;
     }
@@ -151,7 +151,7 @@ public class UsuarioDAO {
                 resultado.add(popularUsuario(rs));
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao listar usuarios!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao listar usuários!", ex);
         }
         return resultado;
     }
@@ -174,7 +174,7 @@ public class UsuarioDAO {
                 }
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao carregar usuario!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao carregar usuário!", ex);
         }
         return usuario;
     }
@@ -197,14 +197,14 @@ public class UsuarioDAO {
             int affectedRows = stmt.executeUpdate();
             conn.commit();
             if (affectedRows > 0) {
-                LOGGER.log(Level.INFO, "Usuario alterado com sucesso (ID: {0})", usuario.getIdUsuario());
+                LOGGER.log(Level.INFO, "Usuário alterado com sucesso (ID: {0})", usuario.getIdUsuario());
                 return true;
             } else {
-                LOGGER.log(Level.WARNING, "Nenhum usuario encontrado para alterar (ID: {0})", usuario.getIdUsuario());
+                LOGGER.log(Level.WARNING, "Nenhum usuário encontrado para alterar (ID: {0})", usuario.getIdUsuario());
                 return false;
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao atualizar usuario!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao atualizar usuário!", ex);
             return false;
         }
     }
@@ -219,14 +219,14 @@ public class UsuarioDAO {
             int affectedRows = stmt.executeUpdate();
             conn.commit();
             if (affectedRows > 0) {
-                LOGGER.log(Level.INFO, "Usuario excluido com sucesso (ID: {0})", idUsuario);
+                LOGGER.log(Level.INFO, "Usuário excluído com sucesso (ID: {0})", idUsuario);
                 return true;
             } else {
-                LOGGER.log(Level.WARNING, "Nenhum usuario encontrado para excluir (ID: {0})", idUsuario);
+                LOGGER.log(Level.WARNING, "Nenhum usuário encontrado para excluir (ID: {0})", idUsuario);
                 return false;
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao excluir usuario!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao excluir usuário!", ex);
             return false;
         }
     }

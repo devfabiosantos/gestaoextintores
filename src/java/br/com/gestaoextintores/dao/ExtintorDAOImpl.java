@@ -39,7 +39,7 @@ public class ExtintorDAOImpl {
             }
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next() && rs.getInt(1) > 0) {
-                    LOGGER.log(Level.WARNING, "Numero controle duplicado '{0}' na filial do setor {1}.", new Object[]{numeroControle, idSetor});
+                    LOGGER.log(Level.WARNING, "Número de controle duplicado '{0}' na filial do setor {1}.", new Object[]{numeroControle, idSetor});
                     return true;
                 }
             }
@@ -227,7 +227,7 @@ public class ExtintorDAOImpl {
                 stmt.executeUpdate();
             }
             conn.commit();
-            LOGGER.log(Level.INFO, "Extintor ID {0} excluido.", idExtintor);
+            LOGGER.log(Level.INFO, "Extintor ID {0} excluído.", idExtintor);
             return true;
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Erro ao excluir extintor!", ex);
@@ -287,7 +287,7 @@ public class ExtintorDAOImpl {
                 }
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao atualizar status multiplos!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao atualizar status múltiplos!", ex);
             if (conn != null) {
                 try {
                     conn.rollback();
@@ -338,15 +338,15 @@ public class ExtintorDAOImpl {
                 int affectedRows = stmt.executeUpdate();
                 conn.commit();
                 if (affectedRows == idsExtintores.size()) {
-                    LOGGER.log(Level.INFO, "{0} extintores pos-recarga atualizados.", affectedRows);
+                    LOGGER.log(Level.INFO, "{0} extintores pós-recarga atualizados.", affectedRows);
                     return true;
                 } else {
-                    LOGGER.log(Level.WARNING, "Update pos-recarga: esperava {0}, afetou {1}", new Object[]{idsExtintores.size(), affectedRows});
+                    LOGGER.log(Level.WARNING, "Update pós-recarga: esperava {0}, afetou {1}", new Object[]{idsExtintores.size(), affectedRows});
                     return false;
                 }
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erro ao atualizar dados pos-recarga!", ex);
+            LOGGER.log(Level.SEVERE, "Erro ao atualizar dados pós-recarga!", ex);
             if (conn != null) {
                 try {
                     conn.rollback();

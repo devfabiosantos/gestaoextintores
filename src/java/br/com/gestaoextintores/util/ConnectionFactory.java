@@ -25,7 +25,7 @@ public class ConnectionFactory {
                 conn.close();
             }
         } catch (SQLException ex) {
-            throw new Exception("Erro ao fechar a conexao: " + ex.getMessage(), ex);
+            throw new Exception("Erro ao fechar a conexão: " + ex.getMessage(), ex);
         }
     }
 }

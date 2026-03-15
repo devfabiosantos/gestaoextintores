@@ -69,7 +69,7 @@ public class RemessaDAO {
                 try {
                     ConnectionFactory.closeConnection(conn);
                 } catch (Exception closeEx) {
-                    LOGGER.log(Level.SEVERE, "Erro fechar conexao!", closeEx);
+                    LOGGER.log(Level.SEVERE, "Erro fechar conexão!", closeEx);
                 }
             }
         }
@@ -130,7 +130,7 @@ public class RemessaDAO {
             if (rs.next()) {
                 remessa = popularRemessa(rs);
             } else {
-                LOGGER.log(Level.WARNING, "Remessa ID {0} nao encontrada ou acesso negado.", idRemessa);
+                LOGGER.log(Level.WARNING, "Remessa ID {0} não encontrada ou acesso negado.", idRemessa);
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Erro SQL ao carregar remessa (ID: " + idRemessa + ")!", ex);
@@ -159,7 +159,7 @@ public class RemessaDAO {
         return remessa;
     }
 
-    // ESSE BLOCO DE CODIGO PASSOU A SER UTILIZADO A PARTIR DE 31/10/2025 - 19:46
+    // ESSE BLOCO DE CÓDIGO PASSOU A SER UTILIZADO A PARTIR DE 31/10/2025 - 19:46
     public boolean aprovarParaRecolhimento(int idRemessa, int idUsuarioAdmin) {
         String sql = "UPDATE remessa SET status_remessa = ?, id_usuario_admin = ?, data_aprovacao = CURRENT_TIMESTAMP WHERE id_remessa = ?";
         String novoStatus = "Aprovado p/ Recolhimento";
