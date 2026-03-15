@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : usuarioEditar
     Created on : 22/10/2025, 12:32:52
     Author     : Dev Fabio Santos
@@ -60,7 +60,6 @@
                         <label for="idFilial" class="form-label">Filial (Obrigatório para Técnico)*</label>
                         <select class="form-select" id="idFilial" name="idFilial">
                             <option value="">Selecione...</option>
-
                             <c:forEach var="filial" items="${listaFiliais}">
                                 <option value="${filial.idFilial}" ${usuario.idFilial == filial.idFilial ? 'selected' : ''}>${filial.nome}</option>
                             </c:forEach>
@@ -68,7 +67,6 @@
                          <div class="invalid-feedback">Obrigatório para Técnicos.</div>
                     </div>
                 </div>
-
 
                 <div class="d-flex justify-content-end mt-4">
                     <a href="${pageContext.request.contextPath}/UsuarioServlet?acao=listar" class="btn btn-outline-secondary me-2">Cancelar</a>
@@ -95,7 +93,19 @@
     }
     document.addEventListener('DOMContentLoaded', toggleFilial);
 
-    (function () { 'use strict'; var forms = document.querySelectorAll('.needs-validation'); Array.prototype.slice.call(forms).forEach(function (form) { form.addEventListener('submit', function (event) { if (!form.checkValidity()) { event.preventDefault(); event.stopPropagation(); } form.classList.add('was-validated'); }, false); }); })();
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
 </script>
 </body>
 </html>

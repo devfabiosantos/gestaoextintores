@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : remessaDetalhe
     Created on : 23/10/2025, 13:02:56
     Author     : Dev Fabio Santos
@@ -17,7 +17,7 @@
 </head>
 <body class="bg-light">
 <div class="container mt-5 mb-5">
-    
+
     <c:if test="${empty remessa}">
          <div class="alert alert-danger text-center">Remessa não encontrada ou acesso negado.</div>
          <a href="${pageContext.request.contextPath}/RemessaServlet?acao=listar" class="btn btn-primary">Voltar para Lista</a>
@@ -28,7 +28,7 @@
             <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Detalhes da Remessa ID: ${remessa.idRemessa}</h4>
             </div>
-            
+
             <div class="card-body">
                 <h5>Informações Gerais</h5>
                 <dl class="row">
@@ -41,10 +41,10 @@
                   <dt class="col-sm-3">Filial:</dt>
                   <dd class="col-sm-9">
                       <c:if test="${not empty remessa.filial}">${remessa.filial.nome}</c:if>
-                      <c:if test="${empty remessa.filial}">ID: ${remessa.idFilial}</c:if> <%-- Fallback --%>
+                      <c:if test="${empty remessa.filial}">ID: ${remessa.idFilial}</c:if>
                   </dd>
 
-                   <dt class="col-sm-3">Técnico Solicitante:</dt>
+                  <dt class="col-sm-3">Técnico Solicitante:</dt>
                   <dd class="col-sm-9">
                       <c:if test="${not empty remessa.tecnico}">${remessa.tecnico.nome}</c:if>
                       <c:if test="${empty remessa.tecnico}">ID: ${remessa.idUsuarioTecnico}</c:if>
@@ -108,15 +108,15 @@
                                             <c:if test="${not empty itemDetalhe.extintor}">
                                                 ${itemDetalhe.extintor.numeroControle} (ID: ${itemDetalhe.idExtintor})
                                             </c:if>
-                                             <c:if test="${empty itemDetalhe.extintor}">
+                                            <c:if test="${empty itemDetalhe.extintor}">
                                                 ID: ${itemDetalhe.idExtintor}
                                             </c:if>
                                         </td>
-                                         <td>
-                                             <c:if test="${not empty itemDetalhe.extintor}">
+                                        <td>
+                                            <c:if test="${not empty itemDetalhe.extintor}">
                                                 ${itemDetalhe.extintor.classeExtintora}
                                             </c:if>
-                                         </td>
+                                        </td>
                                         <td>${itemDetalhe.observacaoTecnico}</td>
                                     </tr>
                                 </c:forEach>
@@ -134,7 +134,7 @@
             </div>
         </div>
     </c:if>
-    
+
 </div>
 </body>
 </html>

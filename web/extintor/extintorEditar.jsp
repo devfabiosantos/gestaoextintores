@@ -22,40 +22,40 @@
                 <input type="hidden" name="acao" value="atualizar" />
                 <input type="hidden" name="idExtintor" value="${extintor.idExtintor}" />
 
-                 <div class="row mb-3">
+                <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="numeroControle" class="form-label">Número de Controle*</label>
                         <input type="text" class="form-control" id="numeroControle" name="numeroControle" value="${extintor.numeroControle}" required>
-                         <div class="invalid-feedback">Obrigatório.</div>
+                        <div class="invalid-feedback">Obrigatório.</div>
                     </div>
                     <div class="col-md-6">
                         <label for="tipoEquipamento" class="form-label">Tipo Equipamento*</label>
                         <select class="form-select" id="tipoEquipamento" name="tipoEquipamento" required>
-                             <option value="">Selecione...</option>
-                             <option value="Portátil" ${extintor.tipoEquipamento == 'Portátil' ? 'selected' : ''}>Portátil</option>
-                             <option value="Carreta" ${extintor.tipoEquipamento == 'Carreta' ? 'selected' : ''}>Carreta</option>
-                         </select>
-                         <div class="invalid-feedback">Obrigatório.</div>
+                            <option value="">Selecione...</option>
+                            <option value="Portátil" ${extintor.tipoEquipamento == 'Portátil' ? 'selected' : ''}>Portátil</option>
+                            <option value="Carreta" ${extintor.tipoEquipamento == 'Carreta' ? 'selected' : ''}>Carreta</option>
+                        </select>
+                        <div class="invalid-feedback">Obrigatório.</div>
                     </div>
                 </div>
 
-                 <div class="row mb-3">
+                <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="classeExtintora" class="form-label">Classe Extintora*</label>
                         <select class="form-select" id="classeExtintora" name="classeExtintora" required>
-                             <option value="">Selecione...</option>
-                             <option value="Água" ${extintor.classeExtintora == 'Água' ? 'selected' : ''}>Água</option>
-                             <option value="Espuma" ${extintor.classeExtintora == 'Espuma' ? 'selected' : ''}>Espuma</option>
-                             <option value="CO2" ${extintor.classeExtintora == 'CO2' ? 'selected' : ''}>CO2</option>
-                             <option value="Pó Químico BC" ${extintor.classeExtintora == 'Pó Químico BC' ? 'selected' : ''}>Pó Químico BC</option>
-                             <option value="Pó Químico ABC" ${extintor.classeExtintora == 'Pó Químico ABC' ? 'selected' : ''}>Pó Químico ABC</option>
-                         </select>
-                         <div class="invalid-feedback">Obrigatório.</div>
+                            <option value="">Selecione...</option>
+                            <option value="Água" ${extintor.classeExtintora == 'Água' ? 'selected' : ''}>Água</option>
+                            <option value="Espuma" ${extintor.classeExtintora == 'Espuma' ? 'selected' : ''}>Espuma</option>
+                            <option value="CO2" ${extintor.classeExtintora == 'CO2' ? 'selected' : ''}>CO2</option>
+                            <option value="Pó Químico BC" ${extintor.classeExtintora == 'Pó Químico BC' ? 'selected' : ''}>Pó Químico BC</option>
+                            <option value="Pó Químico ABC" ${extintor.classeExtintora == 'Pó Químico ABC' ? 'selected' : ''}>Pó Químico ABC</option>
+                        </select>
+                        <div class="invalid-feedback">Obrigatório.</div>
                     </div>
-                     <div class="col-md-6">
+                    <div class="col-md-6">
                         <label for="cargaNominal" class="form-label">Carga Nominal*</label>
                         <input type="text" class="form-control" id="cargaNominal" name="cargaNominal" value="${extintor.cargaNominal}" required>
-                         <div class="invalid-feedback">Obrigatório.</div>
+                        <div class="invalid-feedback">Obrigatório.</div>
                     </div>
                 </div>
 
@@ -67,47 +67,45 @@
                     <div class="col-md-6">
                         <label for="dataValidade" class="form-label">Data de Validade*</label>
                         <input type="date" class="form-control" id="dataValidade" name="dataValidade" value="${not empty dataValidadeValor ? dataValidadeValor : dataValidadeFormatada}" required>
-                         <div class="invalid-feedback">Obrigatório.</div>
+                        <div class="invalid-feedback">Obrigatório.</div>
                     </div>
                 </div>
 
                 <div class="row mb-3">
-                     <div class="col-md-12">
+                    <div class="col-md-12">
                         <label for="referenciaLocalizacao" class="form-label">Referência de Localização*</label>
                         <input type="text" class="form-control" id="referenciaLocalizacao" name="referenciaLocalizacao" value="${extintor.referenciaLocalizacao}" required>
-                         <div class="invalid-feedback">Obrigatório.</div>
+                        <div class="invalid-feedback">Obrigatório.</div>
                     </div>
                 </div>
-                
-                 <div class="row mb-3">
+
+                <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="idSetor" class="form-label">Setor*</label>
                         <select class="form-select" id="idSetor" name="idSetor" required>
                             <option value="">Selecione...</option>
-                            <%-- O Servlet (doGet, acao=editar) DEVE enviar a 'listaSetores' --%>
                             <c:forEach var="setor" items="${listaSetores}">
                                 <option value="${setor.idSetor}" ${extintor.idSetor == setor.idSetor ? 'selected' : ''}>${setor.nome}</option>
                             </c:forEach>
                         </select>
-                         <div class="invalid-feedback">Obrigatório.</div>
+                        <div class="invalid-feedback">Obrigatório.</div>
                     </div>
-                     <div class="col-md-6">
+                    <div class="col-md-6">
                         <label for="idStatus" class="form-label">Status*</label>
                         <select class="form-select" id="idStatus" name="idStatus" required>
-                             <option value="">Selecione...</option>
-                              <%-- O Servlet (doGet, acao=editar) DEVE enviar a 'listaStatus' --%>
-                             <c:forEach var="status" items="${listaStatus}">
+                            <option value="">Selecione...</option>
+                            <c:forEach var="status" items="${listaStatus}">
                                 <option value="${status.idStatus}" ${extintor.idStatus == status.idStatus ? 'selected' : ''}>${status.nome}</option>
                             </c:forEach>
-                         </select>
-                         <div class="invalid-feedback">Obrigatório.</div>
+                        </select>
+                        <div class="invalid-feedback">Obrigatório.</div>
                     </div>
                 </div>
 
                 <div class="row mb-3">
-                     <div class="col-md-12">
+                    <div class="col-md-12">
                         <label for="observacao" class="form-label">Observação</label>
-                        <textarea class="form-control" id="observacao" name="observacao" rows="3">${extintor.observacao}</textarea>
+                        <textarea class="form-control" id="observacao" name="observacao" rows="3"><c:out value='${extintor.observacao}'/></textarea>
                     </div>
                 </div>
 
@@ -119,6 +117,20 @@
         </div>
     </div>
 </div>
-<script> (function () { 'use strict'; var forms = document.querySelectorAll('.needs-validation'); Array.prototype.slice.call(forms).forEach(function (form) { form.addEventListener('submit', function (event) { if (!form.checkValidity()) { event.preventDefault(); event.stopPropagation(); } form.classList.add('was-validated'); }, false); }); })(); </script>
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
 </body>
 </html>

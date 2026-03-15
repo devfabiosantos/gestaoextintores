@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : usuarioCadastrar
     Created on : 22/10/2025, 12:28:16
     Author     : Dev Fabio Santos
@@ -59,7 +59,7 @@
                     </div>
                 </div>
 
-                <div class="row mb-3" id="filialRow" style="display: none;"> 
+                <div class="row mb-3" id="filialRow" style="display: none;">
                     <div class="col-md-12">
                         <label for="idFilial" class="form-label">Filial (Obrigatório para Técnico)*</label>
                         <select class="form-select" id="idFilial" name="idFilial">
@@ -98,7 +98,19 @@
     }
     document.addEventListener('DOMContentLoaded', toggleFilial);
 
-    (function () { 'use strict'; var forms = document.querySelectorAll('.needs-validation'); Array.prototype.slice.call(forms).forEach(function (form) { form.addEventListener('submit', function (event) { if (!form.checkValidity()) { event.preventDefault(); event.stopPropagation(); } form.classList.add('was-validated'); }, false); }); })();
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
 </script>
 </body>
 </html>

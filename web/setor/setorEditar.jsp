@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : setorEditar
     Created on : 28/10/2025, 11:38:02
     Author     : Dev Fabio Santos
@@ -58,20 +58,22 @@
                 </form>
             </div>
         </div>
-    </c:if> 
+    </c:if>
 </div>
 
 <script>
-    (function () { 'use strict'; 
-        var forms = document.querySelectorAll('.needs-validation'); 
-        Array.prototype.slice.call(forms).forEach(function (form) { 
-            form.addEventListener('submit', function (event) { 
-                if (!form.checkValidity()) { 
-                    event.preventDefault(); 
-                    event.stopPropagation(); } 
-                form.classList.add('was-validated'); 
-            }, false); 
-        }); 
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
     })();
 </script>
 </body>

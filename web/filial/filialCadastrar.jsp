@@ -21,9 +21,8 @@
                 </c:if>
 
                 <form action="${pageContext.request.contextPath}/FilialServlet" method="post" class="needs-validation" novalidate>
-                    
                     <input type="hidden" name="acao" value="salvar" />
-                    
+
                     <div class="mb-3">
                         <label for="nome" class="form-label">Nome da Filial</label>
                         <input type="text" class="form-control" id="nome" name="nome" required>

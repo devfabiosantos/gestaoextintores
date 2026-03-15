@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : usuarioListar
     Created on : 22/10/2025, 12:27:13
     Author     : Dev Fabio Santos
@@ -24,8 +24,7 @@
             </a>
         </div>
         <div class="card-body">
-            
-            <%-- --- BLOCO DE MENSAGENS ADICIONADO A PARTIR DE 31/102025 AS 19:56 --- --%>
+
             <c:if test="${not empty sessionScope.mensagemSucesso}">
                 <div class="alert alert-success text-center">${sessionScope.mensagemSucesso}</div>
                 <c:remove var="mensagemSucesso" scope="session"/>
@@ -34,18 +33,17 @@
                 <div class="alert alert-danger text-center">${sessionScope.mensagemErro}</div>
                 <c:remove var="mensagemErro" scope="session"/>
             </c:if>
-            <%-- --- FIM DO BLOCO --- --%>            
-            
+
             <form action="${pageContext.request.contextPath}/UsuarioServlet" method="get" class="mb-4">
-                 <input type="hidden" name="acao" value="listar" /> 
-                 
+                 <input type="hidden" name="acao" value="listar" />
+
                  <div class="row g-3 align-items-end">
                      <div class="col-md-6">
                          <label for="idFilialFiltro" class="form-label">Filtrar por Filial:</label>
                          <select name="idFilialFiltro" id="idFilialFiltro" class="form-select">
                              <option value="" ${empty idFilialSelecionada ? 'selected' : ''}>Todas as Filiais</option>
                              <c:forEach var="filial" items="${listaTodasFiliais}">
-                                 <option value="${filial.idFilial}" 
+                                 <option value="${filial.idFilial}"
                                          <c:if test="${not empty idFilialSelecionada and idFilialSelecionada == filial.idFilial}">selected</c:if>>
                                      <c:out value="${filial.nome}"/>
                                  </option>
@@ -70,7 +68,7 @@
                                     <th>Nome</th>
                                     <th>Login</th>
                                     <th>Perfil</th>
-                                    <th>Filial</th> 
+                                    <th>Filial</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
