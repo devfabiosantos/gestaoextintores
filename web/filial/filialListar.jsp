@@ -16,6 +16,17 @@
                 <a href="${pageContext.request.contextPath}/FilialServlet?acao=novo" class="btn btn-light btn-sm">+ Nova Filial</a>
             </div>
             <div class="card-body">
+                
+                <%-- --- BLOCO DE MENSAGENS ADICIONADO A PARTIR DO DIA 31/10/2025 AS 19:53 --- --%>
+                <c:if test="${not empty sessionScope.mensagemSucesso}">
+                    <div class="alert alert-success text-center">${sessionScope.mensagemSucesso}</div>
+                    <c:remove var="mensagemSucesso" scope="session"/>
+                </c:if>
+                <c:if test="${not empty sessionScope.mensagemErro}">
+                    <div class="alert alert-danger text-center">${sessionScope.mensagemErro}</div>
+                    <c:remove var="mensagemErro" scope="session"/>
+                </c:if>
+                <%-- --- FIM DO BLOCO --- --%>
 
                 <c:if test="${not empty sessionScope.mensagem}">
                     <div class="alert alert-info text-center">${sessionScope.mensagem}</div>

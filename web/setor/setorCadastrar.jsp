@@ -31,7 +31,8 @@
 
                 <div class="mb-3">
                     <label for="nome" class="form-label">Nome do Setor*</label>
-                    <input type="text" class="form-control" id="nome" name="nome" required>
+                    <input type="text" class="form-control" id="nome" name="nome" 
+                           value="<c:out value='${setor.nome}'/>" required>
                     <div class="invalid-feedback">O nome do setor é obrigatório.</div>
                 </div>
 
@@ -40,10 +41,13 @@
                     <select class="form-select" id="idFilial" name="idFilial" required>
                         <option value="">Selecione a filial...</option>
                         <c:forEach var="filial" items="${listaFiliais}">
-                            <option value="${filial.idFilial}">${filial.nome}</option>
+                            <option value="${filial.idFilial}" 
+                                    ${setor.idFilial == filial.idFilial ? 'selected' : ''}>
+                                ${filial.nome}
+                            </option>
                         </c:forEach>
                     </select>
-                    <div class="invalid-feedback">Selecione a filial à qual o setor pertence.</div>
+                    <div class="invalid-feedback">Selecione a filial.</div>
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">

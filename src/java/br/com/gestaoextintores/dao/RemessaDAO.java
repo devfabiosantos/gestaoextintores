@@ -148,7 +148,84 @@ public class RemessaDAO {
         }
         return remessa;
     }
+// ESSE BLOCO DE CÓDIGO PASSOU A SER UTILIZADO A PARTIR DE 31/10/2025 - 19:46
+   
+    public boolean aprovarParaRecolhimento(int idRemessa, int idUsuarioAdmin) {
+        String sql = "UPDATE remessa SET status_remessa = ?, id_usuario_admin = ?, data_aprovacao = CURRENT_TIMESTAMP WHERE id_remessa = ?";
+        String NOVO_STATUS = "Aprovado p/ Recolhimento";
+        Connection conn = null; // Mover para fora
+        try {
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, NOVO_STATUS);
+                stmt.setInt(2, idUsuarioAdmin);
+                stmt.setInt(3, idRemessa);
+                int affectedRows = stmt.executeUpdate();
+                conn.commit(); // Commit
+                return affectedRows > 0;
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao aprovar remessa (ID: " + idRemessa + ")!", ex);
+            if (conn != null) { try { conn.rollback(); } catch (SQLException rbEx) { /* Log */ } }
+            return false;
+        } finally {
+            if (conn != null) { try { ConnectionFactory.closeConnection(conn); } catch (Exception e) { /* Log */ } }
+        }
+    }
 
+    public boolean confirmarRecolhimento(int idRemessa) {
+        String sql = "UPDATE remessa SET status_remessa = ? WHERE id_remessa = ?";
+        String NOVO_STATUS = "Em Recarga";
+        Connection conn = null; // Mover para fora
+        try {
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, NOVO_STATUS);
+                stmt.setInt(2, idRemessa);
+                int affectedRows = stmt.executeUpdate();
+                conn.commit(); // Commit
+                return affectedRows > 0;
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao confirmar recolhimento (ID: " + idRemessa + ")!", ex);
+             if (conn != null) { try { conn.rollback(); } catch (SQLException rbEx) { /* Log */ } }
+            return false;
+        } finally {
+            if (conn != null) { try { ConnectionFactory.closeConnection(conn); } catch (Exception e) { /* Log */ } }
+        }
+    }
+
+     public boolean concluirRemessa(int idRemessa) {
+        String sql = "UPDATE remessa SET status_remessa = ? WHERE id_remessa = ?";
+        String NOVO_STATUS = "Concluído";
+        Connection conn = null; // Mover para fora
+        try {
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, NOVO_STATUS);
+                stmt.setInt(2, idRemessa);
+                int affectedRows = stmt.executeUpdate();
+                conn.commit(); // Commit
+                return affectedRows > 0;
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao concluir remessa (ID: " + idRemessa + ")!", ex);
+             if (conn != null) { try { conn.rollback(); } catch (SQLException rbEx) { /* Log */ } }
+            return false;
+        } finally {
+             if (conn != null) { try { ConnectionFactory.closeConnection(conn); } catch (Exception e) { /* Log */ } }
+        }
+    }
+    
+/*
+    ESSE CÓDIGO TODO COMENTADO ESTAVA EM USO ATÉ 31/10/2025 - 19:45
+    
     public boolean aprovarParaRecolhimento(int idRemessa, int idUsuarioAdmin) {
         String sql = "UPDATE remessa SET status_remessa = ?, id_usuario_admin = ?, data_aprovacao = CURRENT_TIMESTAMP WHERE id_remessa = ?";
         String NOVO_STATUS = "Aprovado p/ Recolhimento";
@@ -221,6 +298,7 @@ public class RemessaDAO {
             return false; 
         }
     }
+*/
 
     private Remessa popularRemessa(ResultSet rs) throws SQLException {
         Remessa remessa = new Remessa();

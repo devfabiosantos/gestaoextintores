@@ -24,6 +24,18 @@
             </a>
         </div>
         <div class="card-body">
+            
+            <%-- --- BLOCO DE MENSAGENS ADICIONADO A PARTIR DE 31/102025 AS 19:56 --- --%>
+            <c:if test="${not empty sessionScope.mensagemSucesso}">
+                <div class="alert alert-success text-center">${sessionScope.mensagemSucesso}</div>
+                <c:remove var="mensagemSucesso" scope="session"/>
+            </c:if>
+            <c:if test="${not empty sessionScope.mensagemErro}">
+                <div class="alert alert-danger text-center">${sessionScope.mensagemErro}</div>
+                <c:remove var="mensagemErro" scope="session"/>
+            </c:if>
+            <%-- --- FIM DO BLOCO --- --%>            
+            
             <form action="${pageContext.request.contextPath}/UsuarioServlet" method="get" class="mb-4">
                  <input type="hidden" name="acao" value="listar" /> 
                  

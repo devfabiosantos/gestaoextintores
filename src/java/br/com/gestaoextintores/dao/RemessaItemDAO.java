@@ -26,7 +26,45 @@ public class RemessaItemDAO {
     private static final Logger LOGGER = Logger.getLogger(RemessaItemDAO.class.getName());
 
     public RemessaItemDAO() {}
+    
+// ESSE MÉTODO PASSOU A SER UTILIZADO DIA 31/10/2025 - 19:50
+    
+    public boolean adicionarItens(int idRemessa, List<RemessaItem> itens) {
+        if (itens == null || itens.isEmpty()) { return true; }
 
+        String sql = "INSERT INTO remessa_item (id_remessa, id_extintor, observacao_tecnico) VALUES (?, ?, ?)";
+        Connection conn = null; // Mover para fora
+        
+        try {
+            conn = ConnectionFactory.getConnection();
+            conn.setAutoCommit(false);
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (RemessaItem item : itens) {
+                    stmt.setInt(1, idRemessa);
+                    stmt.setInt(2, item.getIdExtintor());
+                    stmt.setString(3, item.getObservacaoTecnico());
+                    stmt.addBatch();
+                }
+                int[] resultados = stmt.executeBatch();
+                conn.commit(); // Commit
+                
+                // (Verificação de resultados opcional)
+                return true;
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erro ao adicionar itens à remessa ID: " + idRemessa + "!", ex);
+            if (conn != null) { try { conn.rollback(); } catch (SQLException rbEx) { /* Log */ } }
+            return false;
+        } finally {
+            if (conn != null) { try { ConnectionFactory.closeConnection(conn); } catch (Exception e) { /* Log */ } }
+        }
+    }
+    
+    
+/* ESSE MÉTODO FOI UTILIZADO ATÉ 31/10/2025 - 19:49
+    
     public boolean adicionarItens(int idRemessa, List<RemessaItem> itens) {
         String sql = "INSERT INTO remessa_item (id_remessa, id_extintor, observacao_tecnico) VALUES (?, ?, ?)";
         try (Connection conn = ConnectionFactory.getConnection();
@@ -39,7 +77,7 @@ public class RemessaItemDAO {
             return false; 
         }
     }
-
+*/
     public List<RemessaItem> listarPorRemessa(int idRemessa) {
         List<RemessaItem> resultado = new ArrayList<>();
         String sql = "SELECT ri.*, " +
