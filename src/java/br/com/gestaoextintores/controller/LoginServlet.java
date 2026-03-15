@@ -22,7 +22,6 @@ import javax.servlet.http.HttpSession;
  *
  * @author Dev Fabio Santos
  */
-
 @WebServlet(name = "LoginServlet", urlPatterns = {"/LoginServlet"})
 public class LoginServlet extends HttpServlet {
 
@@ -31,6 +30,13 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession sessao = request.getSession(false);
+        Usuario usuarioLogado = (sessao != null) ? (Usuario) sessao.getAttribute("usuarioLogado") : null;
+
+        if (usuarioLogado != null) {
+            response.sendRedirect(request.getContextPath() + "/");
+            return;
+        }
 
         RequestDispatcher rd = request.getRequestDispatcher("/login.jsp");
         rd.forward(request, response);
@@ -40,8 +46,6 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        //request.setCharacterEncoding("UTF-8");
-
         String login = request.getParameter("login");
         String senha = request.getParameter("senha");
 
@@ -49,24 +53,20 @@ public class LoginServlet extends HttpServlet {
 
         if (login != null && !login.isEmpty() && senha != null && !senha.isEmpty()) {
             try {
-                
                 UsuarioDAO dao = new UsuarioDAO();
                 Usuario usuarioLogado = dao.validarLogin(login, senha);
 
                 if (usuarioLogado != null) {
-                    
                     HttpSession sessao = request.getSession(true);
-                    
                     sessao.setAttribute("usuarioLogado", usuarioLogado);
-                    
-                    LOGGER.log(Level.INFO, "Usuário {0} ({1}) logado com sucesso.", 
+
+                    LOGGER.log(Level.INFO, "Usuário {0} ({1}) logado com sucesso.",
                             new Object[]{usuarioLogado.getLogin(), usuarioLogado.getPerfil()});
 
                     response.sendRedirect(request.getContextPath() + "/");
                     return;
-
                 }
-                
+
             } catch (Exception ex) {
                 LOGGER.log(Level.SEVERE, "Erro ao tentar validar login no DAO.", ex);
                 mensagemErro = "Erro interno no servidor. Tente novamente.";

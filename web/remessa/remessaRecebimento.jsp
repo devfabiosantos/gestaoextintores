@@ -28,7 +28,6 @@
             </c:if>
 
             <p>Por favor, informe as datas de recarga e validade conforme as etiquetas dos extintores recebidos.</p>
->
             <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" class="needs-validation" novalidate>
                 <input type="hidden" name="acao" value="finalizarRecebimento" />
                 <input type="hidden" name="idRemessa" value="${param.idRemessa}" />

@@ -139,6 +139,8 @@ public class ExtintorServlet extends HttpServlet {
             String cargaNominal = request.getParameter("cargaNominal");
             String referenciaLocalizacao = request.getParameter("referenciaLocalizacao");
             String observacao = request.getParameter("observacao");
+            String dataRecargaStr = request.getParameter("dataRecarga");
+            String dataValidadeStr = request.getParameter("dataValidade");
             int idSetor = Integer.parseInt(request.getParameter("idSetor")); // Pode lançar NumberFormatException
             int idStatus = Integer.parseInt(request.getParameter("idStatus")); // Pode lançar NumberFormatException
             
@@ -148,8 +150,6 @@ public class ExtintorServlet extends HttpServlet {
             // --- BLOCO TRY-CATCH DE DATAS CORRIGIDO ---
             try {
                 // Colocar o parse DENTRO do try
-                String dataRecargaStr = request.getParameter("dataRecarga");
-                String dataValidadeStr = request.getParameter("dataValidade");
                 if (dataRecargaStr != null && !dataRecargaStr.isEmpty()) {
                     dataRecarga = DATE_FORMAT.parse(dataRecargaStr); // << CORRIGIDO
                 }
@@ -163,6 +163,8 @@ public class ExtintorServlet extends HttpServlet {
                  // Recarrega dados e reenvia para o formulário
                  request.setAttribute("listaSetores", setorDAO.listar(usuarioLogado));
                  request.setAttribute("listaStatus", statusDAO.listar());
+                 request.setAttribute("dataRecargaValor", dataRecargaStr);
+                 request.setAttribute("dataValidadeValor", dataValidadeStr);
                  // Preenche o objeto com dados já digitados para repopular o form
                  extintor.setTipoEquipamento(tipoEquipamento); extintor.setNumeroControle(numeroControle);
                  extintor.setClasseExtintora(classeExtintora); extintor.setCargaNominal(cargaNominal);
@@ -202,6 +204,8 @@ public class ExtintorServlet extends HttpServlet {
                     request.setAttribute("extintor", extintor); // Reenvia dados digitados
                     request.setAttribute("listaSetores", setorDAO.listar(usuarioLogado));
                     request.setAttribute("listaStatus", statusDAO.listar());
+                    request.setAttribute("dataRecargaValor", dataRecargaStr);
+                    request.setAttribute("dataValidadeValor", dataValidadeStr);
                 }
                 // -----------------------------
 
@@ -220,6 +224,8 @@ public class ExtintorServlet extends HttpServlet {
                     request.setAttribute("extintor", extintor); // Reenvia dados digitados
                     request.setAttribute("listaSetores", setorDAO.listar(usuarioLogado));
                     request.setAttribute("listaStatus", statusDAO.listar());
+                    request.setAttribute("dataRecargaValor", dataRecargaStr);
+                    request.setAttribute("dataValidadeValor", dataValidadeStr);
                 }
                 // -----------------------------
                 

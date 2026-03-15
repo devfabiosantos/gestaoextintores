@@ -14,13 +14,13 @@
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Sistema de Gestão de Extintores</h2>
-                    
+
                     <c:if test="${not empty sessionScope.usuarioLogado}">
                         <div>
                             <span class="me-3">
                                 Bem-vindo(a), ${sessionScope.usuarioLogado.nome}
                             </span>
-                            
+
                             <a href="${pageContext.request.contextPath}/LogoutServlet" class="btn btn-light btn-sm">Sair</a>
                         </div>
                     </c:if>
@@ -61,9 +61,9 @@
                                 </div>
                             </div>
                         </c:if>
-                        
+
                         <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
-                             <div class="col-md-4 mb-4">
+                            <div class="col-md-4 mb-4">
                                 <div class="card h-100">
                                     <div class="card-header bg-secondary text-white">
                                         <h4>Gestão de Usuários</h4>
@@ -94,7 +94,7 @@
                             </div>
                         </div>
 
-                         <div class="col-md-4 mb-4">
+                        <div class="col-md-4 mb-4">
                             <div class="card h-100">
                                 <div class="card-header bg-success text-white">
                                     <h4>Gestão de Remessas</h4>

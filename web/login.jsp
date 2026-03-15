@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : login
     Created on : 20/10/2025, 12:59:49
     Author     : Dev Fabio Santos
@@ -13,7 +13,7 @@
     <title>Login - Gestão de Extintores</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <style>
         body {
             display: flex;
@@ -34,11 +34,11 @@
             <h4 class="mb-0">Gestão de Extintores</h4>
         </div>
         <div class="card-body p-4">
-            
+
             <h5 class="card-title text-center mb-4">Acessar o Sistema</h5>
 
             <form action="${pageContext.request.contextPath}/LoginServlet" method="post">
-                
+
                 <c:if test="${not empty mensagemErro}">
                     <div class="alert alert-danger text-center p-2">
                         ${mensagemErro}
@@ -59,7 +59,7 @@
                     <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
                 </div>
             </form>
-            
+
         </div>
     </div>
 </body>

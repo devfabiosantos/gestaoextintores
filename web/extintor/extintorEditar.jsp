@@ -16,6 +16,8 @@
             <h4 class="mb-0">Editar Extintor</h4>
         </div>
         <div class="card-body">
+            <fmt:formatDate var="dataRecargaFormatada" value="${extintor.dataRecarga}" pattern="yyyy-MM-dd"/>
+            <fmt:formatDate var="dataValidadeFormatada" value="${extintor.dataValidade}" pattern="yyyy-MM-dd"/>
             <form action="${pageContext.request.contextPath}/ExtintorServlet" method="post" class="needs-validation" novalidate>
                 <input type="hidden" name="acao" value="atualizar" />
                 <input type="hidden" name="idExtintor" value="${extintor.idExtintor}" />
@@ -60,11 +62,11 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="dataRecarga" class="form-label">Data de Recarga</label>
-                        <input type="date" class="form-control" id="dataRecarga" name="dataRecarga" value="<fmt:formatDate value='${extintor.dataRecarga}' pattern='yyyy-MM-dd'/>">
+                        <input type="date" class="form-control" id="dataRecarga" name="dataRecarga" value="${not empty dataRecargaValor ? dataRecargaValor : dataRecargaFormatada}">
                     </div>
                     <div class="col-md-6">
                         <label for="dataValidade" class="form-label">Data de Validade*</label>
-                        <input type="date" class="form-control" id="dataValidade" name="dataValidade" value="<fmt:formatDate value='${extintor.dataValidade}' pattern='yyyy-MM-dd'/>" required>
+                        <input type="date" class="form-control" id="dataValidade" name="dataValidade" value="${not empty dataValidadeValor ? dataValidadeValor : dataValidadeFormatada}" required>
                          <div class="invalid-feedback">Obrigatório.</div>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : remessaListar
     Created on : 22/10/2025, 14:39:28
     Author     : Dev Fabio Santos
@@ -28,14 +28,14 @@
 
             <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
                 <form action="${pageContext.request.contextPath}/RemessaServlet" method="get" class="mb-4 border p-3 rounded bg-white">
-                     <input type="hidden" name="acao" value="listar" /> 
+                     <input type="hidden" name="acao" value="listar" />
                      <div class="row g-3 align-items-end">
                          <div class="col-md-6">
                              <label for="idFilialFiltro" class="form-label fw-bold">Filtrar por Filial:</label>
                              <select name="idFilialFiltro" id="idFilialFiltro" class="form-select form-select-sm">
                                  <option value="" ${empty idFilialSelecionada ? 'selected' : ''}>Todas as Filiais</option>
                                  <c:forEach var="filial" items="${listaTodasFiliais}">
-                                     <option value="${filial.idFilial}" 
+                                     <option value="${filial.idFilial}"
                                              <c:if test="${not empty idFilialSelecionada and idFilialSelecionada == filial.idFilial}">selected</c:if>>
                                          <c:out value="${filial.nome}"/>
                                      </option>
@@ -58,17 +58,25 @@
                         <table class="table table-striped table-hover align-middle">
                             <thead class="table-dark text-center">
                                 <tr>
-                                    <th>ID Remessa</th> <th>Data Criação</th> <th>Filial ID</th> <th>Técnico ID</th>
-                                    <th>Status</th> <th>Data Aprovação</th> <th>Admin ID</th>
+                                    <th>ID Remessa</th>
+                                    <th>Data Criação</th>
+                                    <th>Filial ID</th>
+                                    <th>Técnico ID</th>
+                                    <th>Status</th>
+                                    <th>Data Aprovação</th>
+                                    <th>Admin ID</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody class="text-center">
                                 <c:forEach var="remessa" items="${listaRemessas}">
                                     <tr>
-                                        <td>${remessa.idRemessa}</td> <td><fmt:formatDate value="${remessa.dataCriacao}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                        <td>${remessa.idFilial}</td> <td>${remessa.idUsuarioTecnico}</td>
-                                        <td>${remessa.statusRemessa}</td> <td><fmt:formatDate value="${remessa.dataAprovacao}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                        <td>${remessa.idRemessa}</td>
+                                        <td><fmt:formatDate value="${remessa.dataCriacao}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                        <td>${remessa.idFilial}</td>
+                                        <td>${remessa.idUsuarioTecnico}</td>
+                                        <td>${remessa.statusRemessa}</td>
+                                        <td><fmt:formatDate value="${remessa.dataAprovacao}" pattern="dd/MM/yyyy HH:mm"/></td>
                                         <td>${remessa.idUsuarioAdmin != null ? remessa.idUsuarioAdmin : '-'}</td>
                                         <td class="text-center">
                                             <a href="${pageContext.request.contextPath}/RemessaServlet?acao=detalhar&idRemessa=${remessa.idRemessa}" class="btn btn-sm btn-info me-1">Detalhar</a>
