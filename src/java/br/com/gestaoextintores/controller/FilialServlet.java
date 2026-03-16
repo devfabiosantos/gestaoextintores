@@ -5,6 +5,7 @@ import br.com.gestaoextintores.model.Filial;
 import br.com.gestaoextintores.model.Usuario;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
@@ -19,6 +20,65 @@ import javax.servlet.http.HttpSession;
 public class FilialServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(FilialServlet.class.getName());
+    private static final Pattern CNPJ_PATTERN = Pattern.compile("\\d{14}");
+    private static final Pattern CEP_PATTERN = Pattern.compile("\\d{8}");
+
+    private String normalizarNumeros(String valor) {
+        return valor == null ? null : valor.replaceAll("\\D", "");
+    }
+
+    private String trimToNull(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String normalizado = valor.trim();
+        return normalizado.isEmpty() ? null : normalizado;
+    }
+
+    private String montarEnderecoLegado(Filial filial) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(filial.getLogradouro()).append(", ").append(filial.getNumero());
+        if (filial.getComplemento() != null) {
+            sb.append(" - ").append(filial.getComplemento());
+        }
+        sb.append(" - ").append(filial.getBairro());
+        sb.append(", ").append(filial.getCidade()).append(" - ").append(filial.getEstado());
+        if (filial.getCep() != null) {
+            sb.append(", ").append(filial.getCepFormatado());
+        }
+        return sb.toString();
+    }
+
+    private String validarFilial(Filial filial) {
+        if (filial.getNome() == null) {
+            return "O nome da filial é obrigatório.";
+        }
+        if (filial.getCep() == null) {
+            return "O CEP é obrigatório.";
+        }
+        if (!CEP_PATTERN.matcher(filial.getCep()).matches()) {
+            return "Informe um CEP válido com 8 dígitos.";
+        }
+        if (filial.getLogradouro() == null) {
+            return "Rua/Avenida é obrigatória.";
+        }
+        if (filial.getNumero() == null) {
+            return "O número é obrigatório.";
+        }
+        if (filial.getBairro() == null) {
+            return "O bairro é obrigatório.";
+        }
+        if (filial.getCidade() == null) {
+            return "A cidade é obrigatória.";
+        }
+        if (filial.getEstado() == null) {
+            return "O estado é obrigatório.";
+        }
+        if (filial.getCnpj() != null && !CNPJ_PATTERN.matcher(filial.getCnpj()).matches()) {
+            return "Informe um CNPJ válido com 14 dígitos.";
+        }
+        return null;
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -111,12 +171,38 @@ public class FilialServlet extends HttpServlet {
         try {
             FilialDAOImpl filialDAO = new FilialDAOImpl();
 
-            String nome = request.getParameter("nome");
-            String endereco = request.getParameter("endereco");
+            String nome = trimToNull(request.getParameter("nome"));
+            String cnpj = normalizarNumeros(request.getParameter("cnpj"));
+            String cep = normalizarNumeros(request.getParameter("cep"));
+            String logradouro = trimToNull(request.getParameter("logradouro"));
+            String numero = trimToNull(request.getParameter("numero"));
+            String complemento = trimToNull(request.getParameter("complemento"));
+            String bairro = trimToNull(request.getParameter("bairro"));
+            String cidade = trimToNull(request.getParameter("cidade"));
+            String estado = trimToNull(request.getParameter("estado"));
 
             Filial filial = new Filial();
             filial.setNome(nome);
-            filial.setEndereco(endereco);
+            filial.setCnpj(trimToNull(cnpj));
+            filial.setCep(trimToNull(cep));
+            filial.setLogradouro(logradouro);
+            filial.setNumero(numero);
+            filial.setComplemento(complemento);
+            filial.setBairro(bairro);
+            filial.setCidade(cidade);
+            filial.setEstado(estado != null ? estado.toUpperCase() : null);
+
+            String mensagemValidacao = validarFilial(filial);
+            if (mensagemValidacao != null) {
+                request.setAttribute("mensagemErro", mensagemValidacao);
+                request.setAttribute("filial", filial);
+                String jspDestino = "salvar".equals(acao) ? "/filial/filialCadastrar.jsp" : "/filial/filialEditar.jsp";
+                RequestDispatcher rd = request.getRequestDispatcher(jspDestino);
+                rd.forward(request, response);
+                return;
+            }
+
+            filial.setEndereco(montarEnderecoLegado(filial));
 
             HttpSession sessaoAtual = request.getSession();
             if ("salvar".equals(acao)) {

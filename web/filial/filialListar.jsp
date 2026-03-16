@@ -44,7 +44,10 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Nome</th>
+                                        <th>CNPJ</th>
+                                        <th>CEP</th>
                                         <th>Endereço</th>
+                                        <th>Cidade/UF</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -53,7 +56,17 @@
                                         <tr>
                                             <td><c:out value="${filial.idFilial}"/></td>
                                             <td><c:out value="${filial.nome}"/></td>
-                                            <td><c:out value="${filial.endereco}"/></td>
+                                            <td><c:out value="${filial.cnpjFormatado}"/></td>
+                                            <td><c:out value="${filial.cepFormatado}"/></td>
+                                            <td><c:out value="${filial.enderecoCompleto}"/></td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${not empty filial.cidade or not empty filial.estado}">
+                                                        <c:out value="${filial.cidade}"/>/<c:out value="${filial.estado}"/>
+                                                    </c:when>
+                                                    <c:otherwise>-</c:otherwise>
+                                                </c:choose>
+                                            </td>
                                             <td class="text-center">
                                                 <a href="${pageContext.request.contextPath}/FilialServlet?acao=editar&idFilial=${filial.idFilial}" class="btn btn-sm btn-warning">Editar</a>
                                                 
