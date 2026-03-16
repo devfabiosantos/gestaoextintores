@@ -5,6 +5,7 @@ import br.com.gestaoextintores.dao.FilialDAOImpl;
 import br.com.gestaoextintores.dao.RemessaDAO;
 import br.com.gestaoextintores.dao.RemessaItemDAO;
 import br.com.gestaoextintores.dao.StatusExtintorDAOImpl;
+import br.com.gestaoextintores.dao.UsuarioDAO;
 import br.com.gestaoextintores.model.Extintor;
 import br.com.gestaoextintores.model.Filial;
 import br.com.gestaoextintores.model.Remessa;
@@ -77,6 +78,19 @@ public class RemessaServlet extends HttpServlet {
             return null;
         }
         return remessa;
+    }
+
+    private String tentarEnviarEmailRemessa(Remessa remessa, Usuario tecnicoSolicitante, byte[] pdfConteudo, String nomeArquivo)
+            throws Exception {
+        EmailService emailService = new EmailService();
+        EmailService.ResultadoEnvio resultadoEnvio = emailService.enviarNovaRemessa(remessa, tecnicoSolicitante, pdfConteudo, nomeArquivo);
+        if (resultadoEnvio.isEnviado()) {
+            return "E-mail enviado com sucesso.";
+        }
+        if (resultadoEnvio.getMensagem() != null && !resultadoEnvio.getMensagem().trim().isEmpty()) {
+            return resultadoEnvio.getMensagem();
+        }
+        return "Envio de e-mail não realizado.";
     }
 
     @Override
@@ -208,6 +222,7 @@ public class RemessaServlet extends HttpServlet {
             RemessaItemDAO itemDAO = new RemessaItemDAO();
             ExtintorDAOImpl extintorDAO = new ExtintorDAOImpl();
             StatusExtintorDAOImpl statusDAO = new StatusExtintorDAOImpl();
+            UsuarioDAO usuarioDAO = new UsuarioDAO();
 
             if ("criar".equals(acao)) {
                 if (!isTecnico(usuarioLogado)) {
@@ -273,13 +288,7 @@ public class RemessaServlet extends HttpServlet {
 
                 String mensagemSucesso = "Remessa criada com sucesso. PDF gerado.";
                 try {
-                    EmailService emailService = new EmailService();
-                    EmailService.ResultadoEnvio resultadoEnvio = emailService.enviarNovaRemessa(remessaPdf, usuarioLogado, pdfConteudo, nomeArquivo);
-                    if (resultadoEnvio.isEnviado()) {
-                        mensagemSucesso += " E-mail enviado com sucesso.";
-                    } else if (resultadoEnvio.getMensagem() != null) {
-                        mensagemSucesso += " " + resultadoEnvio.getMensagem();
-                    }
+                    mensagemSucesso += " " + tentarEnviarEmailRemessa(remessaPdf, usuarioLogado, pdfConteudo, nomeArquivo);
                 } catch (Exception emailEx) {
                     LOGGER.log(Level.WARNING, "Falha ao enviar e-mail da remessa ID " + idNovaRemessa, emailEx);
                     mensagemSucesso += " Não foi possível enviar o e-mail nesta operação.";
@@ -418,6 +427,54 @@ public class RemessaServlet extends HttpServlet {
                 }
 
                 sessao.setAttribute("mensagemSucesso", "Recebimento da Remessa ID " + remessa.getIdRemessa() + " confirmado.");
+
+            } else if ("reenviarEmail".equals(acao)) {
+                if (!isAdmin(usuarioLogado)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso negado.");
+                    return;
+                }
+
+                Remessa remessa = carregarRemessaOu404(response, remessaDAO, usuarioLogado, getIntParameter(request, "idRemessa"));
+                if (remessa == null) {
+                    return;
+                }
+
+                redirectUrl = request.getContextPath() + "/RemessaServlet?acao=detalhar&idRemessa=" + remessa.getIdRemessa();
+
+                if (remessa.getPdfNomeArquivo() == null || remessa.getPdfNomeArquivo().trim().isEmpty()) {
+                    sessao.setAttribute("mensagemErro", "A remessa ainda não possui PDF gerado para reenvio.");
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
+
+                Remessa remessaComPdf = remessaDAO.carregarPdf(remessa.getIdRemessa(), usuarioLogado);
+                if (remessaComPdf == null || remessaComPdf.getPdfConteudo() == null || remessaComPdf.getPdfConteudo().length == 0) {
+                    sessao.setAttribute("mensagemErro", "Não foi possível carregar o PDF da remessa para reenvio.");
+                    response.sendRedirect(redirectUrl);
+                    return;
+                }
+
+                remessa.setPdfConteudo(remessaComPdf.getPdfConteudo());
+                remessa.setPdfMimeType(remessaComPdf.getPdfMimeType());
+                remessa.setPdfNomeArquivo(remessaComPdf.getPdfNomeArquivo());
+                remessa.setPdfGeradoEm(remessaComPdf.getPdfGeradoEm());
+
+                Usuario tecnicoSolicitante = usuarioDAO.carregar(remessa.getIdUsuarioTecnico());
+                if (tecnicoSolicitante != null) {
+                    remessa.setTecnico(tecnicoSolicitante);
+                }
+
+                try {
+                    String mensagemResultado = tentarEnviarEmailRemessa(
+                            remessa,
+                            tecnicoSolicitante,
+                            remessa.getPdfConteudo(),
+                            remessa.getPdfNomeArquivo());
+                    sessao.setAttribute("mensagemSucesso", "Reenvio da remessa ID " + remessa.getIdRemessa() + ": " + mensagemResultado);
+                } catch (Exception emailEx) {
+                    LOGGER.log(Level.WARNING, "Falha ao reenviar e-mail da remessa ID " + remessa.getIdRemessa(), emailEx);
+                    sessao.setAttribute("mensagemErro", "Não foi possível reenviar o e-mail da remessa ID " + remessa.getIdRemessa() + ".");
+                }
 
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Ação POST inválida: " + acao);

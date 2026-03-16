@@ -173,6 +173,53 @@ Exemplo de deploy no GlassFish:
 
 - `http://localhost:8080/GestaoExtintores/`
 
+### Configuração de SMTP
+
+O fluxo de remessa suporta:
+
+- geração automática de PDF ao criar remessa
+- armazenamento do PDF no banco de dados
+- envio de e-mail com o PDF em anexo
+- reenvio manual do e-mail pelo detalhe da remessa, para perfil `Admin`
+
+As configurações SMTP são lidas por propriedades JVM ou variáveis de ambiente. No ambiente local validado, o e-mail fixo do admin para remessas está configurado como `justinavirtual@gmail.com`.
+
+Propriedades suportadas:
+
+- `gestao.remessa.admin.email`
+- `gestao.mail.host`
+- `gestao.mail.port`
+- `gestao.mail.username`
+- `gestao.mail.password`
+- `gestao.mail.from`
+- `gestao.mail.auth`
+- `gestao.mail.starttls`
+
+Variáveis de ambiente equivalentes:
+
+- `GESTAO_REMESSA_ADMIN_EMAIL`
+- `GESTAO_MAIL_HOST`
+- `GESTAO_MAIL_PORT`
+- `GESTAO_MAIL_USERNAME`
+- `GESTAO_MAIL_PASSWORD`
+- `GESTAO_MAIL_FROM`
+- `GESTAO_MAIL_AUTH`
+- `GESTAO_MAIL_STARTTLS`
+
+Exemplo de configuração no GlassFish:
+
+```powershell
+& 'C:\Users\Voce2\GlassFish_Server\bin\asadmin.bat' create-jvm-options '"-Dgestao.remessa.admin.email=justinavirtual@gmail.com:-Dgestao.mail.host=smtp.gmail.com:-Dgestao.mail.port=587:-Dgestao.mail.username=justinavirtual@gmail.com:-Dgestao.mail.password=<APP_PASSWORD>:-Dgestao.mail.from=justinavirtual@gmail.com:-Dgestao.mail.auth=true:-Dgestao.mail.starttls=true"'
+& 'C:\Users\Voce2\GlassFish_Server\bin\asadmin.bat' restart-domain domain1
+```
+
+Observações operacionais:
+
+- para Gmail pessoal, use `App Password`, não a senha normal da conta
+- em JDKs antigos, pode ser necessário importar a cadeia de confiança do servidor SMTP no truststore do GlassFish
+- o sistema não cancela a criação da remessa se o envio de e-mail falhar
+- quando houver falha, o `Admin` pode reenviar manualmente o e-mail a partir do detalhe da remessa
+
 ## Example Scenarios
 
 ### Cenário 1 - Estrutura organizacional

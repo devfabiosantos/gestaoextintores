@@ -18,6 +18,22 @@
 <body class="bg-light">
 <div class="container mt-5 mb-5">
 
+    <c:if test="${not empty sessionScope.mensagemSucesso}">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ${sessionScope.mensagemSucesso}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+        <c:remove var="mensagemSucesso" scope="session"/>
+    </c:if>
+
+    <c:if test="${not empty sessionScope.mensagemErro}">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            ${sessionScope.mensagemErro}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+        <c:remove var="mensagemErro" scope="session"/>
+    </c:if>
+
     <c:if test="${empty remessa}">
          <div class="alert alert-danger text-center">Remessa não encontrada ou acesso negado.</div>
          <a href="${pageContext.request.contextPath}/RemessaServlet?acao=listar" class="btn btn-primary">Voltar para Lista</a>
@@ -68,6 +84,15 @@
                              class="btn btn-sm btn-outline-primary">
                               Baixar PDF
                           </a>
+                          <c:if test="${sessionScope.usuarioLogado.perfil == 'Admin'}">
+                              <form action="${pageContext.request.contextPath}/RemessaServlet" method="post" class="d-inline">
+                                  <input type="hidden" name="acao" value="reenviarEmail">
+                                  <input type="hidden" name="idRemessa" value="${remessa.idRemessa}">
+                                  <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">
+                                      Reenviar e-mail
+                                  </button>
+                              </form>
+                          </c:if>
                           <span class="ms-2 text-muted">${remessa.pdfNomeArquivo}</span>
                       </c:if>
                       <c:if test="${empty remessa.pdfNomeArquivo}">
@@ -150,5 +175,6 @@
     </c:if>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
